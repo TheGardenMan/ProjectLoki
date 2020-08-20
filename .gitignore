@@ -1,0 +1,4 @@
+smallloki_env/
+Project/Main/__pycache__/
+Project/App/__pycache__/
+Project/App/migrations/__pycache__/
