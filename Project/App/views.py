@@ -3,8 +3,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes,api_view
+from rest_framework.decorators import permission_classes,api_view,authentication_classes
 from .serializers import UserSerializer
+
+#Identify a user using his token
+# request.user.id request.user.username
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+# caveat: authentication_classes should be here
+def me(request):
+	return Response(request.user.id,status=status.HTTP_200_OK)
 
 class UserCreate(APIView):
 	def post(self, request, format='json'):

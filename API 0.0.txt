@@ -1,0 +1,149 @@
+1.login/
+	POST username,password
+	Reply: auth_token or error message
+
+2.signup/
+	POST username,password
+	Reply: auth_token
+	Note:Username availability(using API no 3.Password strength etc is checked by front-end.Hence this should always return token)
+
+3.username_check/
+	POST username
+	Reply: is user name available or not
+
+Below APIs require auth_token in POST by default
+
+4.username_change/
+	POST username
+	Change the username of the user
+	Note:Front-end ensures the availability of new username using API-3
+
+5.notification/
+	Reply:UserID's of Follow-requests-I-received,Details-of-someone-accepting-my-follow-request
+
+	Send data N at a time until collision (receiving the already received notification) is detected at client
+
+6.accept_follow_request/
+	POST user_id
+	Reply:Accept the follow request sent by user_id and return 200-OK
+
+7.follow/
+	POST user_id
+	Send a follow request to user_id
+	Reply: 200-OK
+
+8.delete_received_follow_request/
+	POST sender_user_id
+	Delete the follow request I received from the "sender_user_id" user.
+	Reply: 200-OK
+
+9.followers/
+	Reply: All my followers user_ids
+
+10.following/
+	Reply:user_ids of people I follow
+
+11.delete_follower/
+	POST follower_id
+	Delete my follower with above id and return 200-OK
+
+12.follow_requests/
+	Reply: user_ids to whom I sent follow requests
+
+13.unfollow/
+	POST user_id
+	Unfollow him
+
+14.delete_sent_follow_request/
+	POST user_id
+	Delete the follow request I sent
+
+Note:
+	Every post is identified by (user_id,post_id)
+	Public post contains likes,dislikes(not shown to user),views
+	Private post contains likes,views
+
+15.public_feed/
+	POST my_location(long,lat) (and last_seen_post_id if this is not a first request)
+	Reply:For each post--> (user_id,post_id,likes,views)
+
+16.view_public_post
+	POST user_id,post_id
+	Increment the view of a post and return OK.
+	Front-end ensures nothing is "viewed" twice.
+
+Note: Front-end ensures that like and dislike are not performed at the same time.
+
+17.like_public_post
+	POST user_id,post_id
+	Increment like and OK
+
+18.unlike_public_post
+	...
+
+19.dislike_public_post
+	...
+
+20.undo_dislike_public_post
+
+
+21.private_feed/
+	Return posts,likes,views
+
+22.like_private_post/
+	...
+
+23.unlike_private_post/
+	...
+
+24.public_posts/
+	Return all my public posts (post_id,likes,views)
+
+25.delete_public_post/
+	Mark the post as deleted .Why mark so? IDK! ,OK
+
+26.private_posts/
+	Return all my private posts (post_id,likes,views)
+
+27.make_private_post/
+	POST image
+	...
+
+28.make_public_post/
+	POST location,image
+
+29.find/
+	Return N nearby people user_ids
+
+30.follow_status/
+	POST user_id
+	Return below:
+		Follow status
+		Status codes: 1.Not Following 2.Request sent 3.Following
+
+31.search/
+	Return N people with matching names
+		OR
+	404 if no one is
+
+32.new_public_post_check/
+	Return true if new public_posts are available.An indicator will show this in front-end.So user or front-end ma choose to reload.
+#Do we need this^ for private_posts too?
+
+33.get_username/
+	POST user_id
+	Return the username of user_id
+
+34.update_user_locatiom/
+	POST long,lat
+	I don't know why I added this.Might be to reduce network overhead of sending location with every public_post request.But I didn't update the query accordingly.ToDo
+
+35.change_password/
+	POST new_password
+	Please use django-rest-auth (rest_auth)
+	...
+
+
+ToDo:
+	store user location at server and blah blah
+	Static CDNs with auth :(
