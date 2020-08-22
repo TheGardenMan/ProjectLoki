@@ -2,61 +2,76 @@
 	POST username,password
 	Reply: auth_token or error message
 
-2.signup/
-	POST username,password
+2.signup/	
+	POST username(only lowercase,underscore,numbers allowed),password
 	Reply: auth_token
 	Note:Username availability(using API no 3.Password strength etc is checked by front-end.Hence this should always return token)
 
 3.username_check/
 	POST username
-	Reply: is user name available or not
+	send as lowercase only
+	username is lowercase_d before checked
+	Reply: "f":1 means available "f":0 means not available
 
 Below APIs require auth_token in POST by default
 
+
+
+*Do not use this API.Usernames are permanent* 
 4.username_change/
 	POST username
 	Change the username of the user
 	Note:Front-end ensures the availability of new username using API-3
+------
+7.follow/
+	POST user_id
+	Send a follow request to user_id
+	Reply: 200-OK
 
-5.notification/
-	Reply:UserID's of Follow-requests-I-received,Details-of-someone-accepting-my-follow-request
+13.unfollow/
+	POST user_id
+	Unfollow him
 
-	Send data N at a time until collision (receiving the already received notification) is detected at client
+12.follow_requests/
+	Reply: user_ids to whom I sent follow requests
+
+14.delete_sent_follow_request/
+	POST user_id
+	Delete the follow request I sent
+
+10.following/
+	Reply:user_ids of people I follow
+
+ ------
 
 6.accept_follow_request/
 	POST user_id
 	Reply:Accept the follow request sent by user_id and return 200-OK
 
-7.follow/
-	POST user_id
-	Send a follow request to user_id
-	Reply: 200-OK
+5.notification/
+	Follow Reqs:Dump all received reqs
+	Req Acceptals:Write cursor pagination using timestamp (because old notifs are already there at client.)
+	Unoptimized query:Optimize it
+	Search "notifications" in tables.sql . You'll get two queries.
+	Reply:UserID's of Follow-requests-I-received,Details-of-someone-accepting-my-follow-request
+
+	Send data N at a time until collision (receiving the already received notification) is detected at client
 
 8.delete_received_follow_request/
 	POST sender_user_id
 	Delete the follow request I received from the "sender_user_id" user.
 	Reply: 200-OK
 
-9.followers/
-	Reply: All my followers user_ids
-
-10.following/
-	Reply:user_ids of people I follow
-
 11.delete_follower/
 	POST follower_id
 	Delete my follower with above id and return 200-OK
 
-12.follow_requests/
-	Reply: user_ids to whom I sent follow requests
+9.followers/
+	Reply: All my followers user_ids
+---------
 
-13.unfollow/
-	POST user_id
-	Unfollow him
 
-14.delete_sent_follow_request/
-	POST user_id
-	Delete the follow request I sent
+
 
 Note:
 	Every post is identified by (user_id,post_id)
@@ -69,7 +84,7 @@ Note:
 
 16.view_public_post
 	POST user_id,post_id
-	Increment the view of a post and return OK.
+	Increment the view count of a post and return OK.
 	Front-end ensures nothing is "viewed" twice.
 
 Note: Front-end ensures that like and dislike are not performed at the same time.
@@ -142,8 +157,10 @@ Note: Front-end ensures that like and dislike are not performed at the same time
 	POST new_password
 	Please use django-rest-auth (rest_auth)
 	...
+36.logout/
 
 
 ToDo:
+	notification query is un-optimized and poorly designed.Dumps all requests.
 	store user location at server and blah blah
 	Static CDNs with auth :(

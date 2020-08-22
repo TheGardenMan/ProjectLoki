@@ -2,7 +2,7 @@
 create table follow_requests (req_sender_id integer,req_receiver_id integer,req_time timestamptz);
 insert into follow_requests(req_sender_id,req_receiver_id,req_time) values(1,2,current_timestamp);
 -- ToDo while returning,also return whether_i_am_following_the_user_who_sent_me_the_follow_request (It's available as a separeat function.I wrote it)
--- Follow requests received by me
+-- For notifications:Follow requests received by me
 select req_sender_id from follow_requests where req_receiver_id=2 order by req_time desc;
 -- Follow requests sent by me
 select req_sender_id from follow_requests where req_sender_id=1 order by req_time desc;
