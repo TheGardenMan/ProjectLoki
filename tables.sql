@@ -1,6 +1,6 @@
 -- Follow Requests
 create table follow_requests (req_sender_id integer,req_receiver_id integer,req_time timestamptz);
-insert into follow_requests(req_sender_id,req_receiver_id,req_time) values(1,2,current_timestamp);
+insert into follow_requests(req_sender_id,req_receiver_id,req_time) values(120,122,current_timestamp);
 -- ToDo while returning,also return whether_i_am_following_the_user_who_sent_me_the_follow_request (It's available as a separeat function.I wrote it)
 -- For notifications:Follow requests received by me
 select req_sender_id from follow_requests where req_receiver_id=2 order by req_time desc;
@@ -9,13 +9,26 @@ select req_sender_id from follow_requests where req_sender_id=1 order by req_tim
 -- Follow Request accepted by receiver / deleted by sender /deleted by receiver
 delete from follow_requests where req_sender_id=1 and req_receiver_id=2;
 
+-- transactions:
+	-- Dont run separate queries.Coz one may get done.another may throw exceyion.half-done is dangerous
+	-- accept follow request
+		begin;
+		-- delete the follow request
+		delete from follow_requests where req_sender_id=120 and req_receiver_id=122;
+		-- add to accepted requests
+		insert into follow_requests_accepted(req_acceptor_id,req_acceptee_id,accept_time) values(120,122,current_timestamp);
+		--add to my followers
+		insert into followers(follower_id,followee_id) values(120,122);
+		-- it means commit.You can use it too.
+		end transaction;
 
--- Follow Requests Accepted
-create table follow_requests_accepted(req_acceptor_id integer,req_acceptee_id integer,accept_time timestamptz);
+-- notifications:Follow Requests Accepted
+create table follow_requests_accepted(accept_id SERIAL PRIMARY KEY, req_acceptor_id integer,req_acceptee_id integer,accept_time timestamptz);
 insert into follow_requests_accepted(req_acceptor_id,req_acceptee_id,accept_time) values(1,2,current_timestamp);
-	-- ToDo are_they_following_me
-	-- For notifications:People who accepted my follow requests
-select req_acceptor_id from follow_requests_accepted where req_acceptee_id=2 order by accept_time desc;
+-- first request:Get new accepted_follow_requests for a guy by timestamp desc.Only new should be "Indicated".Client should store the latest accept_id it received to detect collisions.And it should stop sending requests once collision happens.
+select req_acceptor_id from follow_requests_accepted where req_acceptee_id=2 order by accept_time desc limit 5;
+-- Subsequent requests use accept_id received from client to find "Older" notifs.
+select req_acceptor_id from follow_requests_accepted where req_acceptee_id=2 and accept_id<10 order by accept_time desc limit 5;
 
 
 -- Followers
@@ -231,3 +244,4 @@ update auth_user set username='Jxxxxxxx' where id=82;
 
 -- Get user name
 select username from auth_user where user_id
+
