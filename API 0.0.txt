@@ -23,32 +23,32 @@ Below APIs require auth_token in POST by default
 	Change the username of the user
 	Note:Front-end ensures the availability of new username using API-3
 ------
-7.follow/
+5.follow/
 	POST user_id
 	Send a follow request to user_id
 	Reply: 200-OK
 
-13.unfollow/
+6.unfollow/
 	POST user_id
 	Unfollow him
 
-12.follow_requests/
+7.follow_requests/
 	Reply: user_ids to whom I sent follow requests
 
-14.delete_sent_follow_request/
+8.delete_sent_follow_request/
 	POST user_id
 	Delete the follow request I sent
 
-10.following/
+9.following/
 	Reply:user_ids of people I follow
 
  ------
 
-6.accept_follow_request/
+10.accept_follow_request/
 	POST user_id
 	Reply:Accept the follow request sent by user_id and return 200-OK
 
-5.notification/
+11.notification/
 	Follow Reqs:Dump all received reqs
 	Req Acceptals:Write cursor pagination using timestamp (because old notifs are already there at client.)
 	Unoptimized query:Optimize it
@@ -57,16 +57,16 @@ Below APIs require auth_token in POST by default
 
 	Send data N at a time until collision (receiving the already received notification) is detected at client
 
-8.delete_received_follow_request/
+12.delete_received_follow_request/
 	POST sender_user_id
 	Delete the follow request I received from the "sender_user_id" user.
 	Reply: 200-OK
 
-11.delete_follower/
+13.delete_follower/
 	POST follower_id
 	Delete my follower with above id and return 200-OK
 
-9.followers/
+14.followers/
 	Reply: All my followers user_ids
 ---------
 
