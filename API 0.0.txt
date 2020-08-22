@@ -1,13 +1,13 @@
-1.login/
+Done 1.login/
 	POST username,password
-	Reply: auth_token or error message
+	Reply: token or error message
 
-2.signup/	
+Done  2.signup/	
 	POST username(only lowercase,underscore,numbers allowed),password
-	Reply: auth_token
+	Reply: token,username
 	Note:Username availability(using API no 3.Password strength etc is checked by front-end.Hence this should always return token)
 
-3.username_check/
+Done 3.username_check/
 	POST username
 	send as lowercase only
 	username is lowercase_d before checked
@@ -18,44 +18,59 @@ Below APIs require auth_token in POST by default
 
 
 *Do not use this API.Usernames are permanent* 
-4.username_change/
+Dont do 4.username_change/
 	POST username
 	Change the username of the user
 	Note:Front-end ensures the availability of new username using API-3
 ------
-5.follow/
+Done 5.follow/
+	ToDo dont accept req if req is already sent
 	POST user_id
 	Send a follow request to user_id
-	Reply: 200-OK
+	Reply OK or 400 or 500
 
-6.unfollow/
-	POST user_id
-	Unfollow him
-
-7.follow_requests/
-	Reply: user_ids to whom I sent follow requests
-
-8.delete_sent_follow_request/
-	POST user_id
-	Delete the follow request I sent
-
-9.following/
-	Reply:user_ids of people I follow
-
- ------
-
-10.accept_follow_request/
+Done 10.accept_follow_request/
+	Reply OK or 400 or 500
 	POST user_id
 	Reply:Accept the follow request sent by user_id and return 200-OK
 
-11.notification/
-	Follow Reqs:Dump all received reqs
-	Req Acceptals:Write cursor pagination using timestamp (because old notifs are already there at client.)
-	Unoptimized query:Optimize it
-	Search "notifications" in tables.sql . You'll get two queries.
-	Reply:UserID's of Follow-requests-I-received,Details-of-someone-accepting-my-follow-request
+Done 6.unfollow/
+	Reply OK or 500
+	POST user_id
+	Unfollow him
 
-	Send data N at a time until collision (receiving the already received notification) is detected at client
+Done 7.follow_requests_sent/
+	Reply: [id1,id2,...] to whom I sent follow requests or 0
+
+Done 8.delete_sent_follow_request/
+	Reply OK or 500
+	POST user_id
+	Delete the follow request I sent
+
+Done 9.followees/
+	Reply:user_ids of people I follow [id1,id2,...] or 0
+
+ ------
+
+
+
+notifications
+
+36.accepted_follow_requests/
+		Flow:
+			First ever request (request without top_flag):
+				Initially there are no data at client.
+				Client sends request at gets 5 notifs in descending order.Stores accept_id of latest of 5 as "top_flag".Stores accept_id of oldest of 5 as "bottom_flag"
+				Client sends back the bottom_flag and gets content older than and sets oldest thme as "bottom_flag".Continiues until server runs out of data.Then bottom_flag is cleared.
+			Once top_flag is set,following method is used:
+				First request is sent without any flags.After receiving them all,latest of them is set as "temp_top_flag"
+				Further requests happen using bottom_flag and so on until one of the received accept_ids match with top_flag.This means we have started receiving "already received data".Hence client stops further requests and set top_flag=temp_top_flag.
+				temp_top_flag,bottom_flag are cleared.
+			Return : return ids of people who accepted my follow_req [id1,id2,..id5 or less] or 0
+
+37.follow_requests_received/
+			return all of the ids who sent me follow reqs.One big dump.
+	
 
 12.delete_received_follow_request/
 	POST sender_user_id
