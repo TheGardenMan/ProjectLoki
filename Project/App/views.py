@@ -8,20 +8,9 @@ from rest_framework.decorators import permission_classes,api_view,authentication
 from .serializers import UserSerializer
 from . import db_handle
 
-class UserCreate(APIView):
-	def post(self, request, format='json'):
-		serializer = UserSerializer(data=request.data)
-		if serializer.is_valid():
-			user = serializer.save()
-			if user:		
-				token = Token.objects.create(user=user)
-				json = serializer.data
-				json['token'] = token.key
-				return Response(json, status=status.HTTP_201_CREATED)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# request.user.id request.user.username
 
-
-#Below api_view is must for all functions which respond to an API using "Response"
+#Below api_view is must for all functions which respond to an API using "Response".POST means only POST requests are accepted.
 @api_view(['POST'])
 #Response will be in JSON format
 @renderer_classes([JSONRenderer]) 
@@ -35,7 +24,105 @@ def username_check(request):
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserCreate(APIView):
+	def post(self, request, format='json'):
+		# lowercasing the username so that someone cant get a username with caps.Django treats ABC and abc as two diff usernames which is wrong.Hence we force usernames to be small
+		# You cant modify request.data since it is QueryDict type
+		temp_data=request.data.dict()
+		temp_data['username']=temp_data['username'].lower()
+		serializer = UserSerializer(data=temp_data)
+		if serializer.is_valid():
+			user = serializer.save()
+			if user:		
+				token = Token.objects.create(user=user)
+				json = serializer.data
+				json['token'] = token.key
+				return Response(json, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+#Below api_view is must for all functions which respond to an API using "Response".POST means only POST requests are accepted.
+@api_view(['POST'])
+#Response will be in JSON format
+@renderer_classes([JSONRenderer]) 
+# Make sure he's logged in
+@permission_classes([IsAuthenticated])
+def follow(request):
+	# Check that not sending request to himself
+	if request.user.id!=int(request.data['user_id']):
+		result=db_handle.follow(request.user.id,int(request.data['user_id']))
+		if result==1:
+			return Response(status=status.HTTP_200_OK)
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	# Dont try to follow yourself
+	return Response(status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def accept_follow_request(request):
+	if request.user.id!=int(request.data['user_id']):
+		# follower_id,followee_id format.
+		result=db_handle.accept_follow_request(int(request.data['user_id']),request.user.id)
+		if result==1:
+			return Response(status=status.HTTP_200_OK)
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	# Dont try to accept ur own req
+	return Response(status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def unfollow(request):
+	result=db_handle.unfollow(request.user.id,int(request.data['user_id']))
+	if result==1:
+		return Response(status=status.HTTP_200_OK)
+	return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def follow_requests_sent(request):
+	result=db_handle.follow_requests_sent(request.user.id)
+	if result!=0 and len(result)>0:
+		return Response(result,status=status.HTTP_200_OK)
+	return Response(0,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def delete_sent_follow_request(request):
+	result=db_handle.delete_sent_follow_request(request.user.id,int(request.data['user_id']))
+	if result==1:
+		return Response(status=status.HTTP_200_OK)
+	return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def followees(request):
+	result=db_handle.followees(request.user.id)
+	if result!=0 and len(result):
+		return Response(result,status=status.HTTP_200_OK)
+	return Response(0,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def accepted_follow_requests(request):
+	# LastW
+	results=0 #placeholder
+	if request.POST.get("bottom_flag"):
+		results=db_handle.accepted_follow_requests(request.user.id,request.POST.get("bottom_flag"))
+	else:
+		results=db_handle.accepted_follow_requests(request.user.id)
+	return Response(0,status=status.HTTP_200_OK)
+
+# @api_view(['POST'])
+# @renderer_classes([JSONRenderer]) 
+# @permission_classes([IsAuthenticated])
+# def accepted_follow_requests(request):
 class Logout(APIView):
 	# caveat:While sending the GET req,include your token in Header as 
 	# "Authorization : Token dahjad3fhhblah blah.."
@@ -50,13 +137,9 @@ class Logout(APIView):
 			# Return OK
 			return Response(status=status.HTTP_200_OK)
 
-
-
-
-#Below api_view is must for all functions which respond to an API using "Response"
-@api_view(['GET'])
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
 @permission_classes([IsAuthenticated])
-#Identify a user using his token
-# request.user.id request.user.username
-def me(request):
-	return Response(request.user.id,status=status.HTTP_200_OK)
+def whoami(request):
+	content={'name':request.user.username,'id':request.user.id}
+	return Response(content,status=status.HTTP_200_OK)

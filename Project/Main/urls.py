@@ -5,8 +5,16 @@ from rest_framework.authtoken.views import obtain_auth_token
 # Don't use rest_auth for login."obtain_auth_token" is simpler
 #  Warn: Use rest_auth only for changing the password,Add it to settings before using
 urlpatterns = [
+	path('whoami/',views.whoami),
 	path('signup/',views.UserCreate.as_view()),
 	path('login/', obtain_auth_token),
 	path('logout/',views.Logout.as_view()),
 	path('username_check/',views.username_check),
+	path('follow/',views.follow),
+	path('accept_follow_request/',views.accept_follow_request),
+	path('unfollow/',views.unfollow),
+	path('follow_requests_sent/',views.follow_requests_sent),
+	path('delete_sent_follow_request/',views.delete_sent_follow_request),
+	path('followees/',views.followees),
+	path('accepted_follow_requests/',views.accepted_follow_requests),
 	]

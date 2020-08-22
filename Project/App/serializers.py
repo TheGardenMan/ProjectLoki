@@ -11,6 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 	password = serializers.CharField(min_length=8,write_only=True)
 
 	def create(self, validated_data):
+		# Do not convert to lowercase here.Do it in signup view
 		user = User.objects.create_user(validated_data['username'])
 		# GOLD:DND:One should set the password ONLY after creating the user
 		# https://stackoverflow.com/a/42109301/9217577
