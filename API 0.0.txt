@@ -52,7 +52,7 @@ Below APIs require auth_token in POST by default
 
 13.unfollow/
 	POST user_id
-	Unfollow him
+	Unfollow him/her
 
 14.delete_sent_follow_request/
 	POST user_id
