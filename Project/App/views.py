@@ -111,18 +111,72 @@ def followees(request):
 @renderer_classes([JSONRenderer]) 
 @permission_classes([IsAuthenticated])
 def accepted_follow_requests(request):
-	# LastW
 	results=0 #placeholder
 	if request.POST.get("bottom_flag"):
 		results=db_handle.accepted_follow_requests(request.user.id,request.POST.get("bottom_flag"))
 	else:
 		results=db_handle.accepted_follow_requests(request.user.id)
-	return Response(0,status=status.HTTP_200_OK)
+	return Response(results,status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def follow_requests_received(request):
+	results=db_handle.follow_requests_received(request.user.id)
+	return Response(results,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def delete_received_follow_request(request):
+	if db_handle.delete_received_follow_request(request.user.id,request.data['user_id'])==1:
+		return Response(status=status.HTTP_200_OK)
+	return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def delete_follower(request):
+	if db_handle.delete_follower(request.user.id,request.data['user_id'])==1:
+		return Response(status=status.HTTP_200_OK)
+	return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def followers(request):
+	results=db_handle.followers(request.user.id)
+	return Response(results,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def update_user_location(request):
+	result=db_handle.update_user_location(request.user.id,request.data['longitude'],request.data['latitude'])
+	if result==1:
+		return Response(result,status=status.HTTP_200_OK)
+	return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def find_nearby_people(request):
+	results=db_handle.find_nearby_people(request.user.id)
+	return Response(results,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def follow_status(request):
+	result=db_handle.follow_status(request.user.id,request.data['user_id'])
+	return Response(result,status=status.HTTP_200_OK)
+
 
 # @api_view(['POST'])
 # @renderer_classes([JSONRenderer]) 
 # @permission_classes([IsAuthenticated])
-# def accepted_follow_requests(request):
 class Logout(APIView):
 	# caveat:While sending the GET req,include your token in Header as 
 	# "Authorization : Token dahjad3fhhblah blah.."

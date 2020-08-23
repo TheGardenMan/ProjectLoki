@@ -17,4 +17,11 @@ urlpatterns = [
 	path('delete_sent_follow_request/',views.delete_sent_follow_request),
 	path('followees/',views.followees),
 	path('accepted_follow_requests/',views.accepted_follow_requests),
+	path('follow_requests_received/',views.follow_requests_received),
+	path('delete_received_follow_request/',views.delete_received_follow_request),
+	path('delete_follower/',views.delete_follower),
+	path('followers/',views.followers),
+	path('update_user_location/',views.update_user_location),
+	path('find_nearby_people/',views.find_nearby_people),
+	path('follow_status/',views.follow_status),
 	]
