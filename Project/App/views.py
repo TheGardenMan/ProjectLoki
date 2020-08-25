@@ -17,8 +17,7 @@ from . import db_handle
 def username_check(request):
 	try:
 		isAvailable=db_handle.username_check(request.POST.get("username").lower())
-		result={'f':isAvailable} #Return 0 or 1 as result
-		return Response(result,status=status.HTTP_200_OK)
+		return Response(isAvailable,status=status.HTTP_200_OK)
 	except Exception as e:
 		print("Username check errors",e)
 		return Response(status=status.HTTP_400_BAD_REQUEST)
