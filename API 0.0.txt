@@ -8,10 +8,12 @@ Done  2.signup/
 	Note:Username availability(using API no 3.Password strength etc is checked by front-end.Hence this should always return token)
 
 Done 3.username_check/
-	POST username
-	send as lowercase only
-	username is lowercase_d before checked
-	Reply: "f":1 means available "f":0 means not available
+	Do validation in client side,
+	Send req only if username is available,
+	POST username(only lowercase,underscore,numbers allowed),
+	send as lowercase only,,
+	username is lowercase_d before checked,
+	Reply: 1 means available 0 means not available,
 
 Below APIs require auth_token in POST by default
 
@@ -49,14 +51,9 @@ Done 8.delete_sent_follow_request/
 
 Done 9.followees/
 	Reply:user_ids of people I follow [id1,id2,...] or 0
-
  ------
-
-
-
 notifications
-
-36.accepted_follow_requests/
+Done 10.accepted_follow_requests/
 		Flow:
 			First ever request (request without top_flag):
 				Initially there are no data at client.
@@ -66,36 +63,52 @@ notifications
 				First request is sent without any flags.After receiving them all,latest of them is set as "temp_top_flag"
 				Further requests happen using bottom_flag and so on until one of the received accept_ids match with top_flag.This means we have started receiving "already received data".Hence client stops further requests and set top_flag=temp_top_flag.
 				temp_top_flag,bottom_flag are cleared.
-			Return : return ids of people who accepted my follow_req [id1,id2,..id5 or less] or 0
+			Return : return ids of people who accepted my follow_req  and bottom_flag or 0
+			eg :{"acceptee_ids":[122,122,122,122,122],"bottom_flag":7}
 
-37.follow_requests_received/
+Done 11.follow_requests_received/
 			return all of the ids who sent me follow reqs.One big dump.
 	
 
-12.delete_received_follow_request/
+Done 12.delete_received_follow_request/
 	POST sender_user_id
 	Delete the follow request I received from the "sender_user_id" user.
-	Reply: 200-OK
+	Reply: 200-OK or 500
 
-13.delete_follower/
+Done 13.delete_follower/
 	POST follower_id
 	Delete my follower with above id and return 200-OK
 
-14.followers/
+Done 14.followers/
 	Reply: All my followers user_ids
 ---------
 
+Next:
+	find people in ur area whom you dont follow
+
+Done 15.update_user_locatiom/
+		POST longitude,latitude
+		return OK
+		It exists for "find".To find people nearby,locations of all users should be updated freqly.
+Done 16.find_nearby_people/
+		Return N nearby people user_ids whom I dont follow
 
 
+Done 17.follow_status/
+		POST user_id
+		Return below:
+			Follow status
+			Status codes: 1.Not Following 2.Request sent 3.Following
+----------------------Done Aug23--------------------------
 
-Note:
-	Every post is identified by (user_id,post_id)
-	Public post contains likes,dislikes(not shown to user),views
-	Private post contains likes,views
+LW
+	Note:
+		Every post is identified by (user_id,post_id)
+		Public post contains likes,dislikes(not shown to user),views
+		Private post contains likes,views
 
-15.public_feed/
-	POST my_location(long,lat) (and last_seen_post_id if this is not a first request)
-	Reply:For each post--> (user_id,post_id,likes,views)
+28.make_public_post/
+		POST location,image
 
 16.view_public_post
 	POST user_id,post_id
@@ -130,7 +143,7 @@ Note: Front-end ensures that like and dislike are not performed at the same time
 	Return all my public posts (post_id,likes,views)
 
 25.delete_public_post/
-	Mark the post as deleted .Why mark so? IDK! ,OK
+	Mark the post as deleted .Why mark so? Because once deleted,old post id may still be referenced but it will have new pic.So..
 
 26.private_posts/
 	Return all my private posts (post_id,likes,views)
@@ -139,17 +152,9 @@ Note: Front-end ensures that like and dislike are not performed at the same time
 	POST image
 	...
 
-28.make_public_post/
-	POST location,image
 
-29.find/
-	Return N nearby people user_ids
 
-30.follow_status/
-	POST user_id
-	Return below:
-		Follow status
-		Status codes: 1.Not Following 2.Request sent 3.Following
+
 
 31.search/
 	Return N people with matching names
@@ -164,9 +169,7 @@ Note: Front-end ensures that like and dislike are not performed at the same time
 	POST user_id
 	Return the username of user_id
 
-34.update_user_locatiom/
-	POST long,lat
-	I don't know why I added this.Might be to reduce network overhead of sending location with every public_post request.But I didn't update the query accordingly.ToDo
+
 
 35.change_password/
 	POST new_password
@@ -174,8 +177,9 @@ Note: Front-end ensures that like and dislike are not performed at the same time
 	...
 36.logout/
 
-
-ToDo:
-	notification query is un-optimized and poorly designed.Dumps all requests.
-	store user location at server and blah blah
-	Static CDNs with auth :(
+37.post_monitor_dashboard/ (query design is required.)
+	See all new posts as they come,
+	Delete the posts (db and s3),
+	Delete the user (if he posts nasty stuff),
+38.s3_module/
+	Get image,process it,upload it,return the URL or Error.Url gets saved to the posts table.
