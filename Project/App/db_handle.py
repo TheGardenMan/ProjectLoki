@@ -64,7 +64,7 @@ def unfollow(unfollower_id,unfollowee_id):
 
 def follow_requests_sent(sender_id):
 	try:
-		cursor.execute("select req_sender_id from follow_requests where req_sender_id=%s",(sender_id,))
+		cursor.execute("select req_receiver_id from follow_requests where req_sender_id=%s",(sender_id,))
 		request_ids=cursor.fetchall()
 		request_ids=[r[0] for r in request_ids]
 		return request_ids
@@ -81,6 +81,7 @@ def delete_sent_follow_request(req_sender_id,req_receiver_id):
 		return 0
 
 def followees(follower_id):
+	# Return people I follow
 	try:
 		cursor.execute(" select followee_id from followers where follower_id=%s",(follower_id,))
 		followee_ids=cursor.fetchall()
