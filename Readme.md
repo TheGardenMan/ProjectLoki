@@ -1,11 +1,12 @@
 # Read it before making any changes.Write warnings in the below warning section
 
 
-# Warning section  
-        Write clear commit messages!  
-        Make branches while messing with the code!
-        Do not commit to master  
+# Front-end Warnings
 
+        Image processing should be done on client side and image should be directly uploaded to s3.
+
+# Backend warnings
+	
 # Files intro section  
 `tables.sql` contains all tables used in this project and should be updated with caution.  
 `temp.sql` is a temp file for testing queries.Hence it does not matter.  
