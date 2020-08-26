@@ -1,0 +1,2 @@
+1.Public posts are not  sent to followers private feed.Followers don't always get to see your public post
+2.Try to limit the public posts made every day.To reduce spam.
