@@ -175,12 +175,12 @@ def follow_status(request):
 
 # @api_view(['POST'])
 # @renderer_classes([JSONRenderer]) 
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 class Logout(APIView):
 	# caveat:While sending the GET req,include your token in Header as 
 	# "Authorization : Token dahjad3fhhblah blah.."
 	# Only using that token, user is identified and token is deleted from table.Hence during login,new token has to be generated.
-	def get(self, request, format=None):
+	def post(self, request, format=None):
 		try:
 			request.user.auth_token.delete()
 		except Exception as e:
