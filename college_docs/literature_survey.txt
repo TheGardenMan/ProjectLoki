@@ -1,4 +1,4 @@
-aug28
+aug27
 Our literature is about image reccomendation engine.
 We are gonna tell mam that we use a reccomendation engine in public feed to show relevant public posts to users.
 Links:

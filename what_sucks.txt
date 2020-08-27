@@ -1,3 +1,5 @@
 1.Public posts are not  sent to followers private feed.Followers don't always get to see your public post
 2.Try to limit the public posts made every day.To reduce spam.
 3.Do case insensitive usernames at DRF signup.
+4.Do dj production steps.
+5.Setup SSL

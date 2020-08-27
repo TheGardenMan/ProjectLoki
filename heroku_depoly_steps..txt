@@ -1,0 +1,29 @@
+1.Create app
+https://dashboard.heroku.com/new-app
+
+2.Inside the project folder,create required files Procfile (does migrations.Means auth_user is created),runtime.txt,requirements.txt
+
+3.Follow onscreen instructions from step1 to init the remote etc at our system
+.Do not push yet.
+
+4.Create a postgres instance for your project (first time only)
+	Do this inside (where .git is) the project
+	heroku addons:create heroku-postgresql:hobby-dev --version=12
+The created instance has been added to this app (project)
+
+5. Change db_handle.py to access remote db,change settings.py accordingly,get secret_key from os.environ instead of hardcoding.
+DO ALL DJANGO PRODUCTION STEPS.E.G DISABLE DEBUG,ETC
+
+6.Connect to that db and create tables you created at local like below(first time only):
+	heroku pg:psql --app app_name_
+	Now you'll get a shell.Type queries etc.
+
+	Or you can dump the contents of local db to cloud (not so recommended) like below:
+	"heroku pg:push postgres://postgres:jaxtek@localhost:5432/postgres DATABASE --app app_name_here"
+
+When you change tables in local ,you should change in cloud too(as req..).
+
+7.Inside project ,do this:
+	heroku config:set DISABLE_COLLECTSTATIC=1
+8.Push to
+	git push heroku master
