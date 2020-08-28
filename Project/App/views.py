@@ -191,7 +191,7 @@ class Logout(APIView):
 			return Response(status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-@renderer_classes([JSONRenderer]) 
+@renderer_classes([JSONRenderer])
 @permission_classes([IsAuthenticated])
 def whoami(request):
 	content={'name':request.user.username,'id':request.user.id}
