@@ -196,3 +196,12 @@ class Logout(APIView):
 def whoami(request):
 	content={'name':request.user.username,'id':request.user.id}
 	return Response(content,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def get_username(request):
+	result=db_handle.get_username(request.POST.get("id"))
+	if result!=0:
+		return Response(result,status=status.HTTP_200_OK)
+	return Response(0,status=status.HTTP_400_BAD_REQUEST)
