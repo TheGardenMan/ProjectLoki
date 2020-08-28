@@ -100,6 +100,27 @@ Done 17.follow_status/
 			Follow status
 			Status codes: 1.Not Following 2.Request sent 3.Following
 ----------------------Done Aug23--------------------------
+Done 18.logout/
+	POST
+		Deletes token at server
+
+
+Ramanan's Area.Ramanan should do the following first.Refer tables.sql for queries
+
+33.get_username/
+	POST user_id
+	Return the username of user_id
+
+31.search/
+	Return N people's user_id's with matching names
+		OR
+	404 if no one is
+
+
+
+
+
+
 
 LW
 	Note:
@@ -156,18 +177,13 @@ Note: Front-end ensures that like and dislike are not performed at the same time
 
 
 
-31.search/
-	Return N people with matching names
-		OR
-	404 if no one is
+
 
 32.new_public_post_check/
 	Return true if new public_posts are available.An indicator will show this in front-end.So user or front-end ma choose to reload.
 #Do we need this^ for private_posts too?
 
-33.get_username/
-	POST user_id
-	Return the username of user_id
+
 
 
 
@@ -175,7 +191,7 @@ Note: Front-end ensures that like and dislike are not performed at the same time
 	POST new_password
 	Please use django-rest-auth (rest_auth)
 	...
-36.logout/
+
 
 37.post_monitor_dashboard/ (query design is required.)
 	See all new posts as they come,
