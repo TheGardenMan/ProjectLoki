@@ -24,4 +24,5 @@ urlpatterns = [
 	path('update_user_location/',views.update_user_location),
 	path('find_nearby_people/',views.find_nearby_people),
 	path('follow_status/',views.follow_status),
+	path('get_username/',views.get_username),
 	]
