@@ -201,7 +201,7 @@ def whoami(request):
 @renderer_classes([JSONRenderer]) 
 @permission_classes([IsAuthenticated])
 def get_username(request):
-	result=db_handle.get_username(request.POST.get("id"))
+	result=db_handle.get_username(request.POST.get("user_id"))
 	if result!=0:
 		return Response(result,status=status.HTTP_200_OK)
 	return Response(0,status=status.HTTP_400_BAD_REQUEST)

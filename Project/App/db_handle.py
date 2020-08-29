@@ -180,17 +180,16 @@ def follow_status(user_A,user_B):
 	try:
 		cursor.execute("select \"follow_status\"(%s,%s);",(user_A,user_B,))
 		status=cursor.fetchone()
-		status=status[0]
-		return status
+		return status[0]
 	except Exception as e:
 		print("Error at follow_status ",e)
 		return 0
-
-def get_username(search_id):
+# This is Ramanan's first commit.When we return id's from various APIs,front-end calls this API to get username of that user_id
+def get_username(user_id):
 	try:
-		cursor.execute("select username from auth_user where id = %s",(search_id,))
-		req_username = cursor.fetchall()
-		return req_username
+		cursor.execute("select username from auth_user where id = %s",(user_id,))
+		req_username = cursor.fetchone()
+		return req_username[0]
 	except Exception as e:
 		print("Error at get_username")
 		return 0
