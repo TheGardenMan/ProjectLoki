@@ -186,3 +186,11 @@ def follow_status(user_A,user_B):
 		print("Error at follow_status ",e)
 		return 0
 
+def get_username(search_id):
+	try:
+		cursor.execute("select username from auth_user where id = %s",(search_id,))
+		req_username = cursor.fetchall()
+		return req_username
+	except Exception as e:
+		print("Error at get_username")
+		return 0
