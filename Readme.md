@@ -4,6 +4,7 @@
 # Front-end Warnings
 
         Image processing should be done on client side and image should be directly uploaded to s3.
+        Client should take care of caching and stopping requests to server once post collision happens.
 
 # Backend warnings
 	
