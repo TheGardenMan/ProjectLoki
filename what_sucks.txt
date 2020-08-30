@@ -5,3 +5,4 @@
 5.Setup SSL
 6.private post url is like: userid_postid.jpg. We can hide post_id using userid_hashOf(user_id+post_id+salt).Thus no of private posts user made will be somewhat hidden.Can do the same for public posts too
 7.Add a GodView for monitoring,deleting posts.
+#
