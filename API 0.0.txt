@@ -136,8 +136,8 @@ LW
 	On success client call public_post_success API,on failure it requests URL again or blah.
 
 1212.public_post_success/
-	POST successful_post_id
-	Server writes to public_posts_table that post has been made (location is taken from user_last_location since it is regularly updated for find_people_nearby..)
+	POST public_post_id,longitude,latitude
+	Server writes to public_posts_table that "post has been made".Location is sent from front-end
 
 121.public_feed/
 	Return posts (include s3_urls too)
