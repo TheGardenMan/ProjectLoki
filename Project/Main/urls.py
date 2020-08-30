@@ -25,4 +25,8 @@ urlpatterns = [
 	path('find_nearby_people/',views.find_nearby_people),
 	path('follow_status/',views.follow_status),
 	path('get_username/',views.get_username),
+	path('public_post_request/',views.public_post_request),
+	path('public_post_success/',views.public_post_success),
+	path('private_post_request/',views.private_post_request),
+	path('private_post_success/',views.private_post_success),
 	]

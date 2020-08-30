@@ -184,12 +184,57 @@ def follow_status(user_A,user_B):
 	except Exception as e:
 		print("Error at follow_status ",e)
 		return 0
-# This is Ramanan's first commit.When we return id's from various APIs,front-end calls this API to get username of that user_id
+# This is Ramanan's first commit.When we return id's from various APIs,front-end calls this API to get username of that
 def get_username(user_id):
 	try:
 		cursor.execute("select username from auth_user where id = %s",(user_id,))
 		req_username = cursor.fetchone()
 		return req_username[0]
 	except Exception as e:
-		print("Error at get_username")
+		print("Error at get_username ",e)
+		return 0
+# LW
+def get_new_public_post_id(user_id):
+	try: 
+		cursor.execute("select max(public_post_id) from public_posts where user_id=%s;",(user_id,))
+		new_post_id=cursor.fetchone()
+		if new_post_id[0]:
+			return int(new_post_id[0])+1
+			# If first post
+		return 1
+	except Exception as e:
+		print(" Error at get_new_public_post_id ",e)
+		return 0
+
+def public_post_success(user_id,public_post_id,longitude,latitude):
+	try:
+		cursor.execute('''
+			insert into public_posts(user_id,public_post_id,public_post_location,public_post_time,views,likes,dislikes,deleted) 
+			values(%s,%s,ST_MakePoint(%s,%s),current_timestamp,0,0,0,false);''',(user_id,public_post_id,longitude,latitude,)
+			)
+		connection.commit()
+		return 1
+	except Exception as e:
+		print("Error at public_post_success ",e)
+		return 0
+
+def get_new_private_post_id(user_id):
+	try: 
+		cursor.execute("select max(private_post_id) from private_posts where user_id=%s;",(user_id,))
+		new_post_id=cursor.fetchone()
+		if new_post_id[0]:
+			return int(new_post_id[0])+1
+			# If first post
+		return 1
+	except Exception as e:
+		print(" Error at get_new_private_post_id ",e)
+		return 0
+
+def private_post_success(user_id,private_post_id):
+	try:
+		cursor.execute("insert into private_posts(user_id,private_post_id,private_post_time,views,likes,deleted) values(%s,%s,current_timestamp,0,0,false);",(user_id,private_post_id,))
+		connection.commit()
+		return 1
+	except Exception as e:
+		print(" Error at private_post_success ",e)
 		return 0

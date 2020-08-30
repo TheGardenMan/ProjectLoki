@@ -7,7 +7,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import permission_classes,api_view,authentication_classes,renderer_classes
 from .serializers import UserSerializer
 from . import db_handle
-
+from . import s3_handle
 # request.user.id request.user.username
 
 #Below api_view is must for all functions which respond to an API using "Response".POST means only POST requests are accepted.
@@ -205,3 +205,52 @@ def get_username(request):
 	if result!=0:
 		return Response(result,status=status.HTTP_200_OK)
 	return Response(0,status=status.HTTP_400_BAD_REQUEST)
+#  LW
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def public_post_request(request):
+	new_post_id=db_handle.get_new_public_post_id(request.user.id)
+	if new_post_id==0:
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	public_post_filename=''.join(['public/',str(request.user.id),'_',str(new_post_id),'.jpg'])
+	print(public_post_filename)
+	public_post_url=s3_handle.get_upload_url(public_post_filename)
+	if public_post_url==0:
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	result={'filename':public_post_filename,'url':public_post_url}
+	return Response(result,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def public_post_success(request):
+	result=db_handle.public_post_success(request.user.id,request.POST.get("public_post_id"),request.POST.get("longitude"),request.POST.get("latitude"))
+	if result==0:
+		return Response("primary_key_violation_I_think!",status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def private_post_request(request):
+	new_post_id=db_handle.get_new_private_post_id(request.user.id)
+	if new_post_id==0:
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	private_post_filename=''.join(['private/',str(request.user.id),'_',str(new_post_id),'.jpg'])
+	private_post_url=s3_handle.get_upload_url(private_post_filename)
+	if private_post_url==0:
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	result={'filename':private_post_filename,'url':private_post_url}
+	return Response(result,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def private_post_success(request):
+	# pvt post doesn't need location.
+	result=db_handle.private_post_success(request.user.id,request.POST.get("private_post_id"))
+	if result==0:
+		return Response("primary_key_violation_I_think!",status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return Response(status=status.HTTP_200_OK)
