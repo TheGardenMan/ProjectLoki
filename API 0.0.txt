@@ -131,14 +131,20 @@ Done 22.private_post_request/
 Done 23.private_post_success/
 	POST private_post_id
 
+
 ---RTSK start
+
 --Public post actions
+
+
+
 16.view_public_post
 	POST user_id,post_id
 	Increment the view count of a post and return OK.
 	Front-end ensures nothing is "viewed" twice.
 
 	Note: Front-end ensures that like and dislike are not performed at the same time.
+	if someone dislikes the post they liked,front end should call unlike_.. first and dislike_next.. etc .. Same for other functions too.
 
 17.like_public_post
 	POST user_id,post_id
@@ -148,31 +154,11 @@ Done 23.private_post_success/
 	...
 
 19.dislike_public_post
+
 	...
 
 20.undo_dislike_public_post
 	....
-
-
---Private post actions
-22.like_private_post/
-	...
-
-23.unlike_private_post/
-
----RTSK end
-
-
-
-
-
-
-
-121.public_feed/
-	Return posts (include s3_urls too)
-32.new_public_post_check/
-	Return true if new public_posts are available.An indicator will show this in front-end.So user or front-end ma choose to reload.
-#Do we need this^ for private_posts too?
 
 24.public_posts/
 	Return all my public posts (post_id,s3_urls,likes,views)
@@ -180,37 +166,33 @@ Done 23.private_post_success/
 25.delete_public_post/
 	Mark the post as deleted .Delete S3 file.Why mark so? Because once deleted,old post id may still be referenced but it will have new pic.So..
 
------------------Private starts here----------------
+----Private post actions
 
 
-323.private_feed/
-	return s3_urls too
-	..
+22.like_private_post/
 
-
-	...
+23.unlike_private_post/
 
 26.private_posts/
 	Return all my private posts (post_id,s3_urls,likes,views)
 
+313.delete_private_post/
+	POST private_post_id
+	Mark as deleted.
 
-35.change_password/
-	POST new_password
-	Please use django-rest-auth (rest_auth)
-	...
 31.search/
 	Return N people's user_id's with matching names
 		OR
 	404 if no one is
 
-Future
-For super_user only
-post_monitor_APIs
-	Store all new posts in a table like logs = log_table
-	new_posts_availablility_check/
-			return 1 or 0
-	get_new_public_posts/
-			POST keep pinging with last_received_post
-			Return new_posts with URLs ( read from log_table)
-	delete_a_post/
-			mark the post as deleted
+
+---RTSK end
+
+121.public_feed/
+	Return posts (include s3_urls too)
+
+32.new_public_post_check/
+	Return true if new public_posts are available.An indicator will show this in front-end.So user or front-end ma choose to reload.
+
+323.private_feed/
+	return s3_urls too
