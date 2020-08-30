@@ -110,32 +110,16 @@ call update_user_location(121,10.1,11.2);
 -- Public posts
 
 -- Table
-create table public_posts(user_id integer,public_post_id integer,public_post_location geography,public_post_time timestamptz, views integer,likes integer,dislikes integer,deleted boolean);
+create table public_posts(user_id integer,public_post_id integer,public_post_location geography,public_post_time timestamptz, views integer,likes integer,dislikes integer,deleted boolean,PRIMARY KEY(user_id,public_post_id));
 
--- Make public post :Procedure
--- In $BODY$,"BODY" could be anything
-CREATE OR REPLACE PROCEDURE make_public_post(
-	user_id_ integer,
-	longitude_ integer,
-	latitude_ integer
-)
-LANGUAGE 'plpgsql'
-AS $BODY$
-declare
-	new_post_id integer; 
-BEGIN
-	select count(public_post_id) into new_post_id from public_posts where user_id=user_id_;
-	raise notice ' Old public_post_id for user_id % is %',user_id_,new_post_id;
-	new_post_id:=new_post_id+1;
-	raise notice ' New public_post_id for user_id % is %',user_id_,new_post_id;
-	insert into public_posts(user_id,public_post_id,public_post_location,public_post_time,views,likes,dislikes,deleted) values(user_id_,new_post_id,ST_MakePoint(longitude_,latitude_),current_timestamp,0,0,0,false);
-	-- Do not commit inside a procedure while psycopg.. Use connection.commit()
-	raise notice 'public post created successfully %',user_id_;
-END;
-$BODY$;
--- call the procedure
-call make_public_post(1,2,3);
+-- For public post request.
+-- why max instead of count? Coz we may delete the last post which may cause confusions.DND
+select max(public_post_id) from public_posts where user_id='1';
+-- return result +1
 
+-- Make a public post once client confirms.
+insert into public_posts(user_id,public_post_id,public_post_location,public_post_time,views,likes,dislikes,deleted) values(1,2,ST_MakePoint(1,1),current_timestamp,0,0,0,false);
+-- LW
 -- actions 
 -- 1.like_increment 2.like_decrement 3.dislike_increment 4.dislike_decrement 5.view_increment
 -- caveat:Front-end takes care of whether user has already liked it or not
@@ -171,6 +155,7 @@ $BODY$;
 select user_id,public_post_id,views,likes,dislikes from public_posts where user_id=1 order by public_post_time desc;
 
 -- delete public post
+-- deleted flag is needed.Coz if we dont have that and delete the latest post user made,max(public_post_id)+1 will return id of the "latest post (which we deleted)".This will cause confusion.Two diff images with same_ids at updated and un_updated clients.
 update public_posts set deleted=true where user_id=1 and public_post_id=1;
 
 -- public_feed
@@ -186,36 +171,14 @@ update public_posts set deleted=true where user_id=1 and public_post_id=1;
 	-- Receive "TOP" post id,return count(content) newer than that.If user wish to see the enw content,he can hit refresh.
 
 	select count(public_post_id) from public_posts where ST_DWithin(public_post_location, ST_MakePoint(2,3)::geography, 5000) and public_post_time>(select public_post_time from public_posts where user_id=1 and public_post_id=3);
-	-- LW
-	-- Return new posts
-
-
-
 -- Private posts
 -- Table
 create table private_posts(user_id integer,private_post_id integer,private_post_time timestamptz,views integer,likes integer,deleted boolean);
+--  Return next post id blah blahs
+select max(private_post_id) from private_posts where user_id=%s;
 
-
--- make private post
-CREATE OR REPLACE PROCEDURE make_private_post(
-	user_id_ integer
-)
-LANGUAGE 'plpgsql'
-AS $BODY$
-declare
-	new_post_id integer; 
-BEGIN
-	select count(private_post_id) into new_post_id from private_posts where user_id=user_id_;
-	raise notice ' Old private_post_id for user_id % is %',user_id_,new_post_id;
-	new_post_id:=new_post_id+1;
-	raise notice ' New private_post_id for user_id % is %',user_id_,new_post_id;
-	insert into private_posts(user_id,private_post_id,private_post_time,views,likes,deleted) values(user_id_,new_post_id,current_timestamp,0,0,false);
-	-- Do not commit inside a procedure while psycopg.. Use connection.commit()
-	raise notice 'Private post created successfully by %',user_id_;
-END;
-$BODY$;
-call make_private_post(1);
-
+-- Make a public post once client confirms.
+insert into private_posts(user_id,private_post_id,private_post_time,views,likes,deleted) values(user_id_,new_post_id,current_timestamp,0,0,false);
 -- 
 
 
@@ -261,12 +224,8 @@ $BODY$;
 	-- Receive "TOP" post id,return count(content) newer than that.If user wish to see the enw content,he can hit refresh.
 	select count(private_post_id) from private_posts where user_id=(select followee_id from followers where follower_id=1) and private_post_time>(select private_post_time from private_posts where user_id=1 and private_post_id=2);
 
--- Change username 
-update auth_user set username='Jxxxxxxx' where id=82;
-
--- Get user name
-select username from auth_user where user_id
-
 
 -- Search nearby people
 select user_id from user_last_location where ST_DWithin(last_location, ST_MakePoint(2,3)::geography, 5000) and user_id=(select id from auth_user where username like '%search_query_here%')
+-- ToDo
+	-- Find nearby people
