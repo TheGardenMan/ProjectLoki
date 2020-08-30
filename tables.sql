@@ -173,7 +173,7 @@ update public_posts set deleted=true where user_id=1 and public_post_id=1;
 	select count(public_post_id) from public_posts where ST_DWithin(public_post_location, ST_MakePoint(2,3)::geography, 5000) and public_post_time>(select public_post_time from public_posts where user_id=1 and public_post_id=3);
 -- Private posts
 -- Table
-create table private_posts(user_id integer,private_post_id integer,private_post_time timestamptz,views integer,likes integer,deleted boolean);
+create table private_posts(user_id integer,private_post_id integer,private_post_time timestamptz,views integer,likes integer,deleted boolean,primary key(user_id,private_post_id));
 --  Return next post id blah blahs
 select max(private_post_id) from private_posts where user_id=%s;
 
