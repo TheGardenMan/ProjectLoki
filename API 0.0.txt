@@ -105,43 +105,34 @@ Done 18.logout/
 		Deletes token at server
 
 
-Ramanan's Area.Ramanan should do the following first.Refer tables.sql for queries
-
-33.get_username/
+Done 19.get_username/
 	POST user_id
 	Return the username of user_id
 
-31.search/
-	Return N people's user_id's with matching names
-		OR
-	404 if no one is
-
-
-
-
-
-
-
-LW
-	Note:
+Note:
 		Every post is identified by (user_id,post_id)
 		Public post contains likes,dislikes(not shown to user),views
 		Private post contains likes,views
 
-100.public_post_request/
+Done 20.public_post_request/
 	POST (client doesn't send anything)
 	determine the new_public_post_id,
 	send bucketname and filename (==> userid_newPublicPostid.jpg,type=JPEG) to S3.Get the url and keys
 	Return URL,filename and keys to client.Client uploads the image to s3 (filename=filename received from server) using keys and URL.
 	On success client call public_post_success API,on failure it requests URL again or blah.
 
-1212.public_post_success/
+Done 21.public_post_success/
 	POST public_post_id,longitude,latitude
 	Server writes to public_posts_table that "post has been made".Location is sent from front-end
 
-121.public_feed/
-	Return posts (include s3_urls too)
+Done 22.private_post_request/
+	...
 
+Done 23.private_post_success/
+	POST private_post_id
+
+---RTSK start
+--Public post actions
 16.view_public_post
 	POST user_id,post_id
 	Increment the view count of a post and return OK.
@@ -162,6 +153,23 @@ LW
 20.undo_dislike_public_post
 	....
 
+
+--Private post actions
+22.like_private_post/
+	...
+
+23.unlike_private_post/
+
+---RTSK end
+
+
+
+
+
+
+
+121.public_feed/
+	Return posts (include s3_urls too)
 32.new_public_post_check/
 	Return true if new public_posts are available.An indicator will show this in front-end.So user or front-end ma choose to reload.
 #Do we need this^ for private_posts too?
@@ -173,25 +181,13 @@ LW
 	Mark the post as deleted .Delete S3 file.Why mark so? Because once deleted,old post id may still be referenced but it will have new pic.So..
 
 -----------------Private starts here----------------
-27.private_post_request/
-	POST (client doesn't send anything)
-	determine the new_private_post_id,
-	send bucketname and filename (==> userid_newPrivatePostid.jpg,type=JPEG) to S3.Get the url and keys
-	Return URL,filename and keys to client.Client uploads the image to s3 (filename=filename received from server) using keys and URL.
-	On success client call private_post_success API,on failure it requests URL again or blah.
 
-28.private_post_success/
-	POST successful_post_id
-	Server writes to private_posts_table that post has been made.
 
 323.private_feed/
 	return s3_urls too
 	..
 
-22.like_private_post/
-	...
 
-23.unlike_private_post/
 	...
 
 26.private_posts/
@@ -202,6 +198,10 @@ LW
 	POST new_password
 	Please use django-rest-auth (rest_auth)
 	...
+31.search/
+	Return N people's user_id's with matching names
+		OR
+	404 if no one is
 
 Future
 For super_user only
