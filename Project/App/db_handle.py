@@ -1,4 +1,6 @@
 import psycopg2
+# While running this file separately,below import will cause error.But with django,it won't.Do DNW
+# from . import s3_handle
 isError=False
 cursor="blah"
 
@@ -238,3 +240,70 @@ def private_post_success(user_id,private_post_id):
 	except Exception as e:
 		print(" Error at private_post_success ",e)
 		return 0
+
+def public_feed(user_id,lastpost_user_id=None,lastpost_post_id=None):
+	if not lastpost_user_id:
+		cursor.execute("select public_feed_first_request(%s);",(user_id,))
+	else:
+		cursor.execute("select public_feed_subsequent_request(%s,%s,%s);",(user_id,lastpost_user_id,lastpost_post_id,))
+	# cursor.fetchall() format : [('(122,4,0,0,0)',), ('(122,3,0,0,0)',), ('(122,2,0,0,0)',)]
+	results=[]
+	for index,row in enumerate(cursor.fetchall()):
+		# row format ('(122,4,0,0,0)',)
+		# row[0] format (122,4,0,0,0). Type 'str'.I know it sucks.
+		# remove that parantheses. OPTIMIZE the replace
+		temp_row=row[0].replace("(","")
+		temp_row=temp_row.replace(")","")
+		cleaned_row=temp_row.split(",")
+		# cleaned_row ['122', '2', '0', '0', '0'] ['user_id','public_post_id','views','likes','dislikes']
+		# Get the s3 URL
+		cleaned_row.insert(5,s3_handle.get_download_url(''.join(['public_',cleaned_row[0],'_',cleaned_row[1],'.jpg'])))
+		results.insert(index,cleaned_row)
+		return results
+
+def public_post_action(user_id,public_post_id,action):
+	try:
+		cursor.execute("call public_post_actions(%s,%s,%s);",(user_id_,public_post_id,action,))
+		connection.commit()
+		return 1
+	except Exception as e:
+		print(" Error at public_post_action ",e)
+		return 0
+
+def delete_file(user_id,public_post_id):
+	try:
+		cursor.execute("update public_post set deleted=true where user_id=%s and public_post_id=%s;",(user_id,public_post_id,))
+		connection.commit()
+		result=s3_handle.delete_file(''.join ( ["public_",user_id,"_",public_post_id] ) )	
+		return result
+	except Exception as e:
+		print("Error at db_handle.delete_file ",e)
+		return 0
+
+def public_posts(user_id):
+	try:
+		cursor.execute("select user_id,public_post_id,views,likes,dislikes from public_posts where user_id=%s order by public_post_time desc;",(user_id,))
+		results=cursor.fetchall() # [(121,1,2,2,2),(121,2,2,2,2)]....
+		post_details=[]
+		index=0
+		for detail in results:
+			temp=[i for i in detail]
+			# ToDo:Return download URL too
+			post_details.insert(index,temp)
+			index=index+1
+		return post_details
+	except Exception as e:
+		print("Error at public_posts ",e)
+		return 0
+
+def new_public_post_check(user_id,public_post_id):
+	try:
+		cursor.execute("select new_public_post_check(%s,%s);",(user_id,public_post_id,))
+		# [(3,)] or [(None,)]
+		if (cursor.fetchall()[0][0])==None:
+			return 0
+		return 1
+	except Exception as e:
+		print("Error at new_public_post_check ",e)
+		# ToDo -1?!
+		return -1

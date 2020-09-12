@@ -29,4 +29,8 @@ urlpatterns = [
 	path('public_post_success/',views.public_post_success),
 	path('private_post_request/',views.private_post_request),
 	path('private_post_success/',views.private_post_success),
+	path('public_feed/',views.public_feed),
+	path('public_post_action/',views.public_post_action),
+	path('public_posts/',views.public_posts),
+	path('new_public_post_check/',views.new_public_post_check),
 	]

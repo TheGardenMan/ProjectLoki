@@ -205,7 +205,7 @@ def get_username(request):
 	if result!=0:
 		return Response(result,status=status.HTTP_200_OK)
 	return Response(0,status=status.HTTP_400_BAD_REQUEST)
-#  LW
+
 @api_view(['POST'])
 @renderer_classes([JSONRenderer]) 
 @permission_classes([IsAuthenticated])
@@ -213,7 +213,7 @@ def public_post_request(request):
 	new_post_id=db_handle.get_new_public_post_id(request.user.id)
 	if new_post_id==0:
 		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-	public_post_filename=''.join(['public/',str(request.user.id),'_',str(new_post_id),'.jpg'])
+	public_post_filename=''.join(['public_',str(request.user.id),'_',str(new_post_id),'.jpg'])
 	print(public_post_filename)
 	public_post_url=s3_handle.get_upload_url(public_post_filename)
 	if public_post_url==0:
@@ -254,3 +254,60 @@ def private_post_success(request):
 	if result==0:
 		return Response("primary_key_violation_I_think!",status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	return Response(status=status.HTTP_200_OK)
+
+# Front-end updates user's location to user_last_location.Then it requests for public feed.Backend assumes frontend has already updated the location.
+# prev_public_post_id,prev_user_id
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def public_feed(request):
+	post_details=[]
+	if not request.POST.get("lastpost_user_id"):
+		post_details=db_handle.public_feed(request.user.id)
+	else:
+		post_details=db_handle.public_feed(request.user.id,int(request.data['lastpost_user_id']),int(request.data['lastpost_post_id']))
+	return Response(post_details,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def public_post_action(request):
+	result=db_handle.public_post_action(request.POST.get("user_id"),request.POST.get("public_post_id"),request.POST.get("action"))
+	if result:
+		return Response(status=status.HTTP_200_OK)
+	return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def delete_public_post(request):
+	# ToDo client sends token already.Do we need user_id too?
+	if request.user.id==int(request.POST.get("user_id")):
+		result=db_handle.delete_file(request.POST.get("user_id"),request.POST.get("public_post_id"))
+		if result==1:
+			return Response(status=status.HTTP_200_OK)
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def public_posts(request):
+	result=db_handle.public_posts(request.user.id)
+	if result==0:
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	if len(result)==0:
+		return Response(0,status=status.HTTP_200_OK)
+	return Response(result,status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def new_public_post_check(request):
+	result=db_handle.new_public_post_check(request.POST.get("user_id"),request.POST.get("public_post_id"))
+	if result==-1:
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return Response(result,status=status.HTTP_200_OK)

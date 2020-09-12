@@ -1,0 +1,5 @@
+Upload a file
+curl --request PUT --upload-file hello_world.jpg "https://lokiproject.s3.amazonaws.com/hello_world.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAWOUNMIQJMISHWLY2%2F20200902%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20200902T071252Z&X-Amz-Expires=600&X-Amz-SignedHeaders=host&X-Amz-Signature=a829bbb7c66d23c55900066ce9d386688fd85d32b4c185c2183d8df4bd2a4344"
+
+Download the file
+curl --request GET "https://lokiproject.s3.amazonaws.com/hello_world.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAWOUNMIQJMISHWLY2%2F20200902%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20200902T071329Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=aef504ad40d9e2c988575088dbfbb265557b8276f8f09a4c164d072c37b32316" --output filename.jpg
