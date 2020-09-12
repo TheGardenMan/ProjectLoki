@@ -1,6 +1,6 @@
 Done 1.login/
 	POST username,password
-	Reply: token or error message
+	Reply: token or error message and username
 
 Done  2.signup/	
 	POST username(only lowercase,underscore,numbers allowed),password
@@ -130,44 +130,67 @@ Done 22.private_post_request/
 
 Done 23.private_post_success/
 	POST private_post_id
-
-
----RTSK start
+Done 24.public_feed/
+	First request:POST nothing
+	Subseq request:lastpost_user_id,lastpost_post_id (Send id of last post received)
+	Return a 2D array of user_id,post_id,views,likes,dislikes,s3_urls
+	Something like this:
+		[['122', '4', '0', '0', '0', 'https://lokiproject.s3.amazonaws.com/public_122_4.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=affaag%2F20200901%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20200901T094418Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=8db7d4dbb810745f2996867ea2aeff70db98a48dd945fb1035042278eda17610'], ['122', '3', '0', '0', '0', 'https://lokiproject.s3.amazonaws.com/public_122_3.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=affaag%2F20200901%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20200901T094418Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=ed3527dd0c790c47ece4157cf7aed70f46948c0729257ac4cffb7df6837fc480']]
 
 --Public post actions
 
+All these come under one API
+	public_post_action/
 
+	POST user_id,public_post_id,action
+		action--> 1.like_increment 2.like_decrement 3.dislike_increment 4.dislike_decrement 5.view_increment
 
-16.view_public_post
-	POST user_id,post_id
+	>>View_public_post
 	Increment the view count of a post and return OK.
 	Front-end ensures nothing is "viewed" twice.
 
 	Note: Front-end ensures that like and dislike are not performed at the same time.
 	if someone dislikes the post they liked,front end should call unlike_.. first and dislike_next.. etc .. Same for other functions too.
 
-17.like_public_post
+	>>like_public_post
 	POST user_id,post_id
 	Increment like and OK
 
-18.unlike_public_post
+	>>unlike_public_post
 	...
 
-19.dislike_public_post
+	>>dislike_public_post
 
 	...
 
-20.undo_dislike_public_post
+	>>undo_dislike_public_post
 	....
-
 24.public_posts/
-	Return all my public posts (post_id,s3_urls,likes,views)
+	Return all my public posts (post_id,s3_urls,likes,views).If nothing exists,returns 0.This doesn't return urls for ur posts since when they're posted,client will save a copy.In future we'll send URLs too
+Done 32.new_public_post_check/
+	POST user_id,public_post_id
+	return 0-no posts,1-posts,500_ERROR
+	Return true if new public_posts are available.An indicator will show this in front-end.So user or front-end may choose to reload.
 
-25.delete_public_post/
+Done 25.delete_public_post/
+	POST user_id (ToDo:To delete your own post,no need for user_id),public_post_id
 	Mark the post as deleted .Delete S3 file.Why mark so? Because once deleted,old post id may still be referenced but it will have new pic.So..
 
-----Private post actions
 
+------Sep 02 2020--------------
+
+
+
+
+
+
+
+
+
+
+
+
+	---PVT---For next build......
 
 22.like_private_post/
 
@@ -186,13 +209,7 @@ Done 23.private_post_success/
 	404 if no one is
 
 
----RTSK end
 
-121.public_feed/
-	Return posts (include s3_urls too)
-
-32.new_public_post_check/
-	Return true if new public_posts are available.An indicator will show this in front-end.So user or front-end ma choose to reload.
 
 323.private_feed/
 	return s3_urls too
