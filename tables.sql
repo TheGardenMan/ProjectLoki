@@ -1,4 +1,4 @@
-#Readmeeeeeeeeeeeeeeeee: Do not commit inside a procedure while using pscopg2
+#Readmeeeeeeeeeeeeeeeee: Do not commit inside a procedure while using psycopg2
 
 -- Username availability check
 -- If it returns 0,username is available.Case sensitive
@@ -118,12 +118,12 @@ select max(public_post_id) from public_posts where user_id='1';
 -- return result +1
 
 -- Make a public post once client confirms.
-insert into public_posts(user_id,public_post_id,public_post_location,public_post_time,views,likes,dislikes,deleted) values(1,2,ST_MakePoint(1,1),current_timestamp,0,0,0,false);
+insert into public_posts(user_id,public_post_id,public_post_location,public_post_time,views,likes,dislikes,deleted) values(122,2,ST_MakePoint(1,2),current_timestamp,0,0,0,false);
 -- LW
 -- actions 
 -- 1.like_increment 2.like_decrement 3.dislike_increment 4.dislike_decrement 5.view_increment
 -- caveat:Front-end takes care of whether user has already liked it or not
-CREATE OR REPLACE PROCEDURE public_post_actions(user_id_,public_post_id_,action_)
+CREATE OR REPLACE PROCEDURE public_post_actions(user_id_ integer,public_post_id_ integer,action_ integer)
 LANGUAGE 'plpgsql'
 AS $BODY$
 declare
@@ -151,26 +151,80 @@ BEGIN
 END;
 $BODY$;
 
+call public_post_actions(1,2,3);
 -- my_public_posts
 select user_id,public_post_id,views,likes,dislikes from public_posts where user_id=1 order by public_post_time desc;
 
 -- delete public post
 -- deleted flag is needed.Coz if we dont have that and delete the latest post user made,max(public_post_id)+1 will return id of the "latest post (which we deleted)".This will cause confusion.Two diff images with same_ids at updated and un_updated clients.
 update public_posts set deleted=true where user_id=1 and public_post_id=1;
+-- longitude,latitude,old_public_post_id,old_user_id
+
 
 -- public_feed
--- First request
-	SELECT user_id,public_post_id,views,likes,dislikes FROM public_posts WHERE ST_DWithin(public_post_location, ST_MakePoint(2,3)::geography, 5000) order by public_post_time desc limit 20;
+
+		-- First request
+		create or replace function public_feed_first_request(post_req_sender_id integer)
+		  returns table (user_id_ integer,public_post_id_ integer,views_ integer,likes_ integer,dislikes_ integer)
+		as
+		$$
+		declare
+			last_location_ geography;
+		begin
+			select last_location into last_location_ from user_last_location where user_id=post_req_sender_id;
+			return query select user_id,public_post_id,views,likes,dislikes from public_posts WHERE ST_DWithin(public_post_location,last_location_, 5000) and deleted=false order by public_post_time desc limit 2;
+		end;
+		$$
+		language plpgsql;
+		commit;
+		-- call the func
+		select public_feed_first_request(121);
+
+
 -- Subsequent requests
-	-- Find the timestamp using pointer (last_seen_post=>(user_id,public_post_id))
-	select public_post_time from public_posts where public_post_id=1 and user_id=2;
+			create or replace function public_feed_subsequent_request(post_req_sender_id integer,user_id_of_last_post integer,post_id_of_last_post integer)
+			  returns table (user_id_ integer,public_post_id_ integer,views_ integer,likes_ integer,dislikes_ integer)
+			as
+			$$
+			declare
+				last_location_ geography;
+				last_post_timestamp timestamptz;
+			begin
+				select last_location into last_location_ from user_last_location where user_id=post_req_sender_id;
+				select public_post_time  into last_post_timestamp from public_posts where user_id=user_id_of_last_post and public_post_id=post_id_of_last_post;
+				return query SELECT user_id,public_post_id,views,likes,dislikes FROM public_posts WHERE ST_DWithin(public_post_location,last_location_, 5000) and public_post_time<(last_post_timestamp) and deleted=false order by public_post_time desc limit 2;
+			end;
+			$$
+			language plpgsql;
 
-	-- Find nearby posts "Older" than the timestamp found above
-	SELECT user_id,public_post_id,views,likes,dislikes FROM public_posts WHERE ST_DWithin(public_post_location, ST_MakePoint(2,3)::geography, 5000) and public_post_time<(select public_post_time from public_posts where user_id=1 and public_post_id=3) order by public_post_time desc limit 20;
+		select public_feed_subsequent_request(121,122,2);
+
 	-- Are there new public posts? If result is > 0,AVAILABLE.
-	-- Receive "TOP" post id,return count(content) newer than that.If user wish to see the enw content,he can hit refresh.
+	-- Receive "TOP" post id,return count(content) newer than that.If user wish to see the new content,he can hit refresh.
+	-- new_post_check
+	create or replace function new_public_post_check(user_id_ integer,public_post_id_ integer)
+	returns integer
+	as
+	$$
+	declare
+		last_location_ geography;
+		last_post_timestamp_ timestamptz;
+		count_ integer;
+	begin
+		count_:=0;
+		select last_location into last_location_ from user_last_location where user_id=user_id_;
+		select  public_post_time into last_post_timestamp_ from public_posts where user_id=user_id_ and public_post_id=public_post_id_;
+		-- It's enough if one row exists.No need to count everything.If result contains any content,new_posts are available.
+		select public_post_id into count_ from public_posts where ST_DWithin(public_post_location, last_location_,5000) and public_post_time>(last_post_timestamp_) limit 1;
+		return count_;
+	end;
+	$$
+	language plpgsql;
+	commit;
+	-- if len(res)>0:
+		-- return 1
+	select new_public_post_check(122,5);	
 
-	select count(public_post_id) from public_posts where ST_DWithin(public_post_location, ST_MakePoint(2,3)::geography, 5000) and public_post_time>(select public_post_time from public_posts where user_id=1 and public_post_id=3);
 -- Private posts
 -- Table
 create table private_posts(user_id integer,private_post_id integer,private_post_time timestamptz,views integer,likes integer,deleted boolean,primary key(user_id,private_post_id));
@@ -220,12 +274,15 @@ $BODY$;
 -- Subsequent requests using pointer
 	-- structure :select detaials from table where user_id=(people I follow) and post_time<(last seen post time)
 	select user_id,private_post_id,views,likes from private_posts where user_id=(select followee_id from followers where follower_id=1) and private_post_time<(select private_post_time from private_posts where user_id=1 and private_post_id=2) order by private_post_time desc;
+
 	-- Are there "new" private posts available? IF result is non-zero,AVAILABLE.
 	-- Receive "TOP" post id,return count(content) newer than that.If user wish to see the enw content,he can hit refresh.
-	select count(private_post_id) from private_posts where user_id=(select followee_id from followers where follower_id=1) and private_post_time>(select private_post_time from private_posts where user_id=1 and private_post_id=2);
+			-- >> use the same public func as template
 
 
 -- Search nearby people
 select user_id from user_last_location where ST_DWithin(last_location, ST_MakePoint(2,3)::geography, 5000) and user_id=(select id from auth_user where username like '%search_query_here%')
 -- ToDo
 	-- Find nearby people
+-- public_feed
+
