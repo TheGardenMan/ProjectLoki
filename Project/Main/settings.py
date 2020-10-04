@@ -16,11 +16,11 @@ INSTALLED_APPS = [
 	'corsheaders',
 ]
 # CORS headers are important.They are necessary.DND.You cant get tokens without them.pleeaseeeeeeeee
-
+# rest_framework.parsers.MultiPartParser is required since we send all our data from front-end as formdata
 REST_FRAMEWORK = {
 	'DEFAULT_AUTHENTICATION_CLASSES': (
 		'rest_framework.authentication.TokenAuthentication',
-	)
+	),
 }
 
 MIDDLEWARE = [

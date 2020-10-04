@@ -1,0 +1,29 @@
+during public_post_success,loc is sent from client via the req itself.
+--------
+during public_feed,front-end sends req to update_user_location first.Then it calls public_feed.public_feed gets the location from said table.
+-------
+We show only deleted=false posts.
+If post was deleted in the middle? S3 still gives the URL.Front-end detects the delete when req-ing that file.Then it proceeds not to show that file.
+DeletedFile reply from S3:
+	<Error>
+	<Code>NoSuchKey</Code>
+	<Message>The specified key does not exist.</Message>
+	<Key>public_124_2.jpg</Key>
+	<RequestId>68DEB5E319784114</RequestId>
+	<HostId>
+	NQmPB+2fWuUEVYWh4G1gddKAkEwR29U1mp2uBFOgLyw0yqfP5wCrSBCp7VwcdZhSENjn7Klny3Y=
+	</HostId>
+	</Error>
+
+-------
+DRF doesn't do pwd validation other than min length=8.So we use Django's validators.But they're too strict.
+So write custom validator;
+	https://sixfeetup.com/blog/custom-password-validators-in-django
+	https://docs.djangoproject.com/en/3.0/topics/auth/passwords/#writing-your-own-validator
+	https://stackoverflow.com/questions/43915518/how-to-use-custom-password-validators-beside-the-django-auth-password-validators
+Just import then and use:
+	https://stackoverflow.com/questions/36414804/integrate-django-password-validators-with-django-rest-framework-validate-passwor
+----
+Postman requests Content-Type should be "application/json".It is the standard.
+And in drf view ,access like request.data["username"]
+	--Non-standard If you are using multi-formdata in Postman or formData in fronr-end,in drf accees like request.POST.get("username")

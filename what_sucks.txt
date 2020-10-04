@@ -1,8 +1,9 @@
-1.Public posts are not  sent to followers private feed.Followers don't always get to see your public post
+1.Public posts are not  sent to followers private feed.Your followers don't always get to see your public post.Those posts are just public.Your followers may or may not see them.
 2.Try to limit the public posts made every day.To reduce spam.
 3.Do case insensitive usernames at DRF signup.
 4.Do dj production steps.
 5.Setup SSL
 6.private post url is like: userid_postid.jpg. We can hide post_id using userid_hashOf(user_id+post_id+salt).Thus no of private posts user made will be somewhat hidden.Can do the same for public posts too
 7.Add a GodView for monitoring,deleting posts.
+8.get_username is dangerous.Any auth-ed user can send a number and get username.
 #

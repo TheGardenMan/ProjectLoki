@@ -3,9 +3,17 @@ Done 1.login/
 	Reply: token or error message and username
 
 Done  2.signup/	
-	POST username(only lowercase,underscore,numbers allowed),password
+	POST username ,password
+		min 5 characters
+		max 15 characters
+		start with a-z
+		allowed:a-z,0-9 (no capital letters)
+
+		/^[a-z0-9]{5,15}$/
+	password 8 to 12 chars
 	Reply: token,username
-	Note:Username availability(using API no 3.Password strength etc is checked by front-end.Hence this should always return token)
+	Note:Username availability(using API no 3) 
+	Password strength etc is checked by front-end.Hence this should always return token)
 
 Done 3.username_check/
 	Do validation in client side,
