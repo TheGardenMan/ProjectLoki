@@ -16,7 +16,8 @@ from . import s3_handle
 @renderer_classes([JSONRenderer]) 
 def username_check(request):
 	try:
-		isAvailable=db_handle.username_check(request.POST.get("username").lower())
+		print(request.data)
+		isAvailable=db_handle.username_check(request.data["username"].lower())
 		return Response(isAvailable,status=status.HTTP_200_OK)
 	except Exception as e:
 		print("Username check errors",e)
@@ -111,8 +112,8 @@ def followees(request):
 @permission_classes([IsAuthenticated])
 def accepted_follow_requests(request):
 	results=0 #placeholder
-	if request.POST.get("bottom_flag"):
-		results=db_handle.accepted_follow_requests(request.user.id,request.POST.get("bottom_flag"))
+	if request.data["bottom_flag"]:
+		results=db_handle.accepted_follow_requests(request.user.id,request.data["bottom_flag"])
 	else:
 		results=db_handle.accepted_follow_requests(request.user.id)
 	return Response(results,status=status.HTTP_200_OK)
@@ -201,7 +202,7 @@ def whoami(request):
 @renderer_classes([JSONRenderer]) 
 @permission_classes([IsAuthenticated])
 def get_username(request):
-	result=db_handle.get_username(request.POST.get("user_id"))
+	result=db_handle.get_username(request.data["user_id"])
 	if result!=0:
 		return Response(result,status=status.HTTP_200_OK)
 	return Response(0,status=status.HTTP_400_BAD_REQUEST)
@@ -225,7 +226,7 @@ def public_post_request(request):
 @renderer_classes([JSONRenderer]) 
 @permission_classes([IsAuthenticated])
 def public_post_success(request):
-	result=db_handle.public_post_success(request.user.id,request.POST.get("public_post_id"),request.POST.get("longitude"),request.POST.get("latitude"))
+	result=db_handle.public_post_success(request.user.id,request.data["public_post_id"],request.data["longitude"],request.data["latitude"])
 	if result==0:
 		return Response("primary_key_violation_I_think!",status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	return Response(status=status.HTTP_200_OK)
@@ -250,7 +251,7 @@ def private_post_request(request):
 @permission_classes([IsAuthenticated])
 def private_post_success(request):
 	# pvt post doesn't need location.
-	result=db_handle.private_post_success(request.user.id,request.POST.get("private_post_id"))
+	result=db_handle.private_post_success(request.user.id,request.data["private_post_id"])
 	if result==0:
 		return Response("primary_key_violation_I_think!",status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	return Response(status=status.HTTP_200_OK)
@@ -263,7 +264,7 @@ def private_post_success(request):
 @permission_classes([IsAuthenticated])
 def public_feed(request):
 	post_details=[]
-	if not request.POST.get("lastpost_user_id"):
+	if not request.data["lastpost_user_id"]:
 		post_details=db_handle.public_feed(request.user.id)
 	else:
 		post_details=db_handle.public_feed(request.user.id,int(request.data['lastpost_user_id']),int(request.data['lastpost_post_id']))
@@ -273,7 +274,7 @@ def public_feed(request):
 @renderer_classes([JSONRenderer]) 
 @permission_classes([IsAuthenticated])
 def public_post_action(request):
-	result=db_handle.public_post_action(request.POST.get("user_id"),request.POST.get("public_post_id"),request.POST.get("action"))
+	result=db_handle.public_post_action(request.data["user_id"],request.data["public_post_id"],request.data["action"])
 	if result:
 		return Response(status=status.HTTP_200_OK)
 	return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -283,8 +284,8 @@ def public_post_action(request):
 @permission_classes([IsAuthenticated])
 def delete_public_post(request):
 	# ToDo client sends token already.Do we need user_id too?
-	if request.user.id==int(request.POST.get("user_id")):
-		result=db_handle.delete_file(request.POST.get("user_id"),request.POST.get("public_post_id"))
+	if request.user.id==int(request.data["user_id"]):
+		result=db_handle.delete_file(request.data["user_id"],request.data["public_post_id"])
 		if result==1:
 			return Response(status=status.HTTP_200_OK)
 		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -307,7 +308,7 @@ def public_posts(request):
 @renderer_classes([JSONRenderer]) 
 @permission_classes([IsAuthenticated])
 def new_public_post_check(request):
-	result=db_handle.new_public_post_check(request.POST.get("user_id"),request.POST.get("public_post_id"))
+	result=db_handle.new_public_post_check(request.data["user_id"],request.data["public_post_id"])
 	if result==-1:
 		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	return Response(result,status=status.HTTP_200_OK)

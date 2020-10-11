@@ -1,0 +1,63 @@
+-------------ALL DONE!!!!!!!!!!!------------------
+ 1.login/
+ 2.signup/	
+ min 5 characters
+		max 15 characters
+		start with a-z
+		allowed:a-z,0-9 (no capital letters)
+
+		/^[a-z0-9]{5,15}$/
+	password 8 to 12 chars
+ 3.username_check/
+ 18.logout/
+ 19.get_username/
+ 20.public_post_request/
+ 21.public_post_success/
+ 15.update_user_location/ -- use this API for now to select custom location while posting.
+
+
+
+ view_public_post
+ like_public_post
+ unlike_public_post
+ dislike_public_post
+ undo_dislike_public_post
+
+ public_feed/n
+
+delete_public_post/
+
+24.public_posts/
+
+22.new_public_post_check/
+-----------------
+
+
+Since we are running out of time and haven't begun work on front-end,we are gonna make significant process today.
+Our priority is front-end:
+	Along with public posts,we should add one unique feature which is setting custom location.We can simplify it by using a form first and then a MapView if possible.
+So this week:
+	1.Ramanan will write all private post related APIs before 11-OCT-2020-SUNDAY
+		(I will call him and explain the procedure via Zoom)
+		(If he can't finish due to Samsung stuff,I will take care of it.)
+	2.Jagadees will start work on front-end tomorrow and finish public posts and custom_user_location (important feature that diffs our project) before 11-OCT-2020-SUNDAY
+	3.Kishore will convert all of our tables into diagrams ( and make them as one ER diagram if possible) ( I will tell him in call) before 11-OCT-2020-SUNDAY
+	4.Sathya will take care of 
+		1.architecture diagram and modules (I will explain to him in call )
+		2.Compile front-end code to APKs.If not possible,we will stick with web version
+	5.On next Monday itself,our PPT for next review should be ready.We can add more features after that.Safety first.
+
+Sunday:
+	1.Kishore will start work on tables-to-diag.
+	2.Sathya will compile first APK and get to know full flow of modules from me
+	3.Ramanan will start work on private APIs after Zoom
+	4.Jagadees will start work on custom_user_location API and front-end
+
+If EY interview date is announced,I will prepare the day before.No other go.We dont have time.
+
+Since I cant focus on aptitude preparation,Ramanan (and sathya-but mostly Ramanan) has to help me with online tests as they have always done.Help me with CTS online test next Sunday,and Intel intern test on Monday!
+
+I know there are 3 of us not placed yet.But complete the above tasks within this week and you are free to go.
+We need to finish the project ASAP so full collaboration is required.
+We will talk at 8PM today.Think of some solutions I might have missed and let me know in call.
+*No mistakes.No do-overs*
