@@ -311,3 +311,48 @@ def new_public_post_check(request):
 	if result==-1:
 		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	return Response(result,status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def like_private_post(request):
+	result = db_handle.like_private_post(request.data["user_id"],request.data["post_id"])
+	if result == 0:
+		return Response(status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return Response(status = status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def unlike_private_post(request):
+	result = db_handle.unlike_private_post(request.data["user_id"],request.data["post_id"])
+	if result == 0:
+		return Response(status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return Response(status = status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def private_posts(request):
+	result = db_handle.private_posts(request.data["user_id"])
+	if result == 0:
+		return Response(status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return Response(result,status = status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def delete_private_post(request):
+	result = db_handle.delete_private_post(request.data["post_id"])
+	if result == 0:
+		return Response(status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+	return Response(status = status.HTTP_200_OK)
+
+@api_view(['POST'])
+@renderer_classes([JSONRenderer]) 
+@permission_classes([IsAuthenticated])
+def search(request):
+	result = db_handle.search(request.data["username"])
+	if result == 0:
+		return Response(status = status.HTTP_404_NOT_FOUND)
+	return Response(result,status = status.HTTP_200_OK)
