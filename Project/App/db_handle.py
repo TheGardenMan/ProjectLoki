@@ -189,12 +189,63 @@ def follow_status(user_A,user_B):
 # This is Ramanan's first commit.When we return id's from various APIs,front-end calls this API to get username of that
 def get_username(user_id):
 	try:
-		cursor.execute("select username from auth_user where id = %s",(user_id,))
+		cursor.execute("select username from auth_user where id = %s;",(user_id,))
 		req_username = cursor.fetchone()
 		return req_username[0]
 	except Exception as e:
 		print("Error at get_username ",e)
 		return 0
+
+def like_private_post(user_id,post_id):
+	try:
+		cursor.execute("update private_posts set likes = likes+1 where user_id = %s and private_post_id = %s;",(user_id,post_id,))
+		connection.commit()
+		return 1
+	except Exception as e:
+		print("Error at like_private_post",e)
+		return 0
+
+def unlike_private_post(user_id,post_id):
+	try:
+		cursor.execute("update private_posts set likes = likes-1 where user_id = %s and private_post_id = %s and likes>0;",(user_id,post_id,))
+		connection.commit()
+		return 1
+	except Exception as e:
+		print("Error at unlike_private_post",e)
+		return 0
+
+def private_posts(user_id):
+	try:
+		cursor.execute("select private_post_id, views, likes from private_posts where user_id = %s order by private_post_time desc;",(user_id,))
+		post_details = cursor.fetchall()
+		if len(post_details)>0:
+			return post_details
+		return 0
+	except Exception as e:
+		print("Error at private_posts",e)
+		return 0
+
+def delete_private_post(private_post_id):
+	try:
+		cursor.execute("update private_posts set deleted = 1 where private_post_id = %s;",(private_post_id,))
+		connection.commit()
+		return 1
+	except Exception as e:
+		print("Error at delete_private_post",e)
+		return 0
+
+def search(username):
+	try:
+		cursor.execute("select id from auth_user where username like '%{0}%';".format(username))
+		results = cursor.fetchall()
+		results = [r[0] for r in results]
+		if len(results)>0:
+			return results
+		return 0
+	except Exception as e:
+		print("Error at search",e)
+		return 0
+		
 # LW
 def get_new_public_post_id(user_id):
 	try: 
