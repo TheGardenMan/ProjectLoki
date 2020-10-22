@@ -219,7 +219,9 @@ def public_post_request(request):
 	public_post_url=s3_handle.get_upload_url(public_post_filename)
 	if public_post_url==0:
 		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-	result={'filename':public_post_filename,'url':public_post_url}
+		# ToDo:Filename not needed since fE uploads raw bin .not a file with name etc.
+		# Changed:return public_post_id since client doesn't have it and client needs to send it back to server during success
+	result={'filename':public_post_filename,'url':public_post_url,'public_post_id':new_post_id}
 	return Response(result,status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -243,6 +245,8 @@ def private_post_request(request):
 	private_post_url=s3_handle.get_upload_url(private_post_filename)
 	if private_post_url==0:
 		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+		# ToDo:Filename not needed since fE uploads raw bin .not a file with name etc.
+		# Return new_post_id as private_post_id since client needs to send it back to serve during success
 	result={'filename':private_post_filename,'url':private_post_url}
 	return Response(result,status=status.HTTP_200_OK)
 
@@ -264,10 +268,14 @@ def private_post_success(request):
 @permission_classes([IsAuthenticated])
 def public_feed(request):
 	post_details=[]
-	if not request.data["lastpost_user_id"]:
+	# Changed: lastpost_user_id exists or not is checked using try since it throws KeyError
+	try:
+		if request.data["lastpost_user_id"]:
+			post_details=db_handle.public_feed(request.user.id,int(request.data['lastpost_user_id']),int(request.data['lastpost_post_id']))
+	except Exception as e:
+		# First feed request
 		post_details=db_handle.public_feed(request.user.id)
-	else:
-		post_details=db_handle.public_feed(request.user.id,int(request.data['lastpost_user_id']),int(request.data['lastpost_post_id']))
+	# print(post_details)
 	return Response(post_details,status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -299,7 +307,7 @@ def public_posts(request):
 	if result==0:
 		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 	if len(result)==0:
-		return Response(0,status=status.HTTP_200_OK)
+		return Response(100,status=status.HTTP_200_OK)
 	return Response(result,status=status.HTTP_200_OK)
 
 

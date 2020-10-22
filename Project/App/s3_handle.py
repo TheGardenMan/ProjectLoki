@@ -3,6 +3,7 @@ import os
 AWS_ACCESS_KEY_ID =os.environ['AWS_ACCESS_KEY_ID']
 AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
 AWS_BUCKET_NAME = 'lokiproject'
+# print(AWS_SECRET_KEY)
 client = boto3.client(
 	's3',
 	aws_access_key_id = AWS_ACCESS_KEY_ID,
@@ -18,7 +19,7 @@ def get_upload_url(filename):
 				'Bucket': AWS_BUCKET_NAME,
 				'Key': filename,
 			}, 
-			ExpiresIn = 600,
+			ExpiresIn = 60000,
 		)
 		return upload_url
 	except Exception as e:
@@ -49,4 +50,5 @@ def delete_file(filename):
 		return 0
 # print(get_download_url("hello_world.jpg"))
 # print(delete_file("hello_world.jpg"))
-# print(get_upload_url("hello_world.jpg"))
+# print(get_upload_url("x.jpg"))
+# print(get_download_url("public_2_2.jpg"))

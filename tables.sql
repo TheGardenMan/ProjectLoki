@@ -159,7 +159,7 @@ select user_id,public_post_id,views,likes,dislikes from public_posts where user_
 -- deleted flag is needed.Coz if we dont have that and delete the latest post user made,max(public_post_id)+1 will return id of the "latest post (which we deleted)".This will cause confusion.Two diff images with same_ids at updated and un_updated clients.
 update public_posts set deleted=true where user_id=1 and public_post_id=1;
 -- longitude,latitude,old_public_post_id,old_user_id
-
+-- Changed:Limit from  to 5
 
 -- public_feed
 
@@ -172,7 +172,7 @@ update public_posts set deleted=true where user_id=1 and public_post_id=1;
 			last_location_ geography;
 		begin
 			select last_location into last_location_ from user_last_location where user_id=post_req_sender_id;
-			return query select user_id,public_post_id,views,likes,dislikes from public_posts WHERE ST_DWithin(public_post_location,last_location_, 5000) and deleted=false order by public_post_time desc limit 2;
+			return query select user_id,public_post_id,views,likes,dislikes from public_posts WHERE ST_DWithin(public_post_location,last_location_, 5000) and deleted=false order by public_post_time desc limit 5;
 		end;
 		$$
 		language plpgsql;

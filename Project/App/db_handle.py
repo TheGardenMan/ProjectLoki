@@ -1,6 +1,7 @@
 import psycopg2
 # While running this file separately,below import will cause error.But with django,it won't.Do DNW
-# from . import s3_handle
+# ToDo:insert to append in all files
+from . import s3_handle
 isError=False
 cursor="blah"
 
@@ -310,7 +311,8 @@ def public_feed(user_id,lastpost_user_id=None,lastpost_post_id=None):
 		# Get the s3 URL
 		cleaned_row.insert(5,s3_handle.get_download_url(''.join(['public_',cleaned_row[0],'_',cleaned_row[1],'.jpg'])))
 		results.insert(index,cleaned_row)
-		return results
+		# Changed:return was inside the loop
+	return results
 
 def public_post_action(user_id,public_post_id,action):
 	try:
@@ -336,12 +338,14 @@ def public_posts(user_id):
 		cursor.execute("select user_id,public_post_id,views,likes,dislikes from public_posts where user_id=%s order by public_post_time desc;",(user_id,))
 		results=cursor.fetchall() # [(121,1,2,2,2),(121,2,2,2,2)]....
 		post_details=[]
-		index=0
+
 		for detail in results:
 			temp=[i for i in detail]
-			# ToDo:Return download URL too
-			post_details.insert(index,temp)
-			index=index+1
+			# Changed:Added S3 download URLs
+			filename=''.join(['public_',str(detail[0]),'_',str(detail[1]),'.jpg'])
+			# append 
+			temp.append(s3_handle.get_download_url(filename))
+			post_details.append(temp)
 		return post_details
 	except Exception as e:
 		print("Error at public_posts ",e)
