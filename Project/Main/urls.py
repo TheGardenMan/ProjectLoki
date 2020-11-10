@@ -33,6 +33,7 @@ urlpatterns = [
 	path('public_post_action/',views.public_post_action),
 	path('public_posts/',views.public_posts),
 	path('new_public_post_check/',views.new_public_post_check),
+	path('private_feed/',views.private_feed),
 	path('like_private_post/',views.like_private_post),
 	path('unlike_private_post/',views.unlike_private_post),
 	path('private_posts/',views.private_posts),

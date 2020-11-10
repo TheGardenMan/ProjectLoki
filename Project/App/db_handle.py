@@ -167,11 +167,15 @@ def update_user_location(user_id,longitude,latitude):
 
 def find_nearby_people(user_id):
 	try:
-		cursor.execute("select user_id from user_last_location where ST_DWithin(last_location,(select last_location from user_last_location where user_id=%s),5000) and user_id NOT IN(select followee_id from followers where follower_id=%s) order by last_time desc limit 10;",(user_id,user_id,))
+		cursor.execute("select user_id from user_last_location where ST_DWithin(last_location,(select last_location from user_last_location where user_id=%s),15000) and user_id NOT IN(select followee_id from followers where follower_id=%s) order by last_time desc limit 10;",(user_id,user_id,))
 		people=cursor.fetchall()
 		people=[p[0] for p in people]
 		# user_id is incld in it.so..
-		people.remove(user_id)
+		try:
+			people.remove(user_id)
+		except Exception as e:
+			# user_id was not in the list.So no worries
+			b="c"
 		if len(people)==0:
 			return 0
 		return people
@@ -194,7 +198,7 @@ def get_username(user_id):
 		req_username = cursor.fetchone()
 		return req_username[0]
 	except Exception as e:
-		print("Error at get_username ",e)
+		print("Error at get_username ..",e)
 		return 0
 
 def like_private_post(user_id,post_id):
@@ -218,10 +222,16 @@ def unlike_private_post(user_id,post_id):
 def private_posts(user_id):
 	try:
 		cursor.execute("select private_post_id, views, likes from private_posts where user_id = %s order by private_post_time desc;",(user_id,))
-		post_details = cursor.fetchall()
-		if len(post_details)>0:
-			return post_details
-		return 0
+		results = cursor.fetchall()
+		post_details=[]
+		for detail in results:
+			temp=[i for i in detail]
+			# Changed:Added S3 download URLs
+			filename=''.join(['private_',str(user_id),'_',str(detail[0]),'.jpg'])
+			# append 
+			temp.append(s3_handle.get_download_url(filename))
+			post_details.append(temp)
+		return post_details
 	except Exception as e:
 		print("Error at private_posts",e)
 		return 0
@@ -247,7 +257,6 @@ def search(username):
 		print("Error at search",e)
 		return 0
 		
-# LW
 def get_new_public_post_id(user_id):
 	try: 
 		cursor.execute("select max(public_post_id) from public_posts where user_id=%s;",(user_id,))
@@ -362,3 +371,24 @@ def new_public_post_check(user_id,public_post_id):
 		print("Error at new_public_post_check ",e)
 		# ToDo -1?!
 		return -1
+# LW:Goto table.sql and write pvt feed funcs
+def private_feed(user_id,lastpost_user_id=None,lastpost_post_id=None):
+	if not lastpost_user_id:
+		cursor.execute("select private_feed_first_request(%s);",(user_id,))
+	else:
+		cursor.execute("select private_feed_subsequent_request(%s,%s,%s);",(user_id,lastpost_user_id,lastpost_post_id,))
+	# cursor.fetchall() format : [('(122,4,0,0)',), ('(122,3,0,0)',), ('(122,2,0,0)',)]
+	results=[]
+	for index,row in enumerate(cursor.fetchall()):
+		# row format ('(122,4,0,0,0)',)
+		# row[0] format (122,4,0,0,0). Type 'str'.I know it sucks.
+		# remove that parantheses. OPTIMIZE the replace
+		temp_row=row[0].replace("(","")
+		temp_row=temp_row.replace(")","")
+		cleaned_row=temp_row.split(",")
+		# cleaned_row ['122', '2', '0', '0', '0'] ['user_id','public_post_id','views','likes']
+		# Get the s3 URL
+		cleaned_row.insert(5,s3_handle.get_download_url(''.join(['private_',cleaned_row[0],'_',cleaned_row[1],'.jpg'])))
+		results.insert(index,cleaned_row)
+	return results
+

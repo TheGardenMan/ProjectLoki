@@ -96,7 +96,7 @@ declare
 	useless_ integer; 
 BEGIN
 	if exists (select user_id from user_last_location where user_id=user_id_) then
-		update user_last_location SET last_location=ST_MakePoint(longitude_,latitude_), last_time=current_timestamp where user_id=1;
+		update user_last_location SET last_location=ST_MakePoint(longitude_,latitude_), last_time=current_timestamp where user_id=user_id_;
 	else
 		insert into user_last_location(user_id,last_location,last_time) values (user_id_,ST_MakePoint(longitude_,latitude_),current_timestamp);
 	end if;
@@ -119,7 +119,6 @@ select max(public_post_id) from public_posts where user_id='1';
 
 -- Make a public post once client confirms.
 insert into public_posts(user_id,public_post_id,public_post_location,public_post_time,views,likes,dislikes,deleted) values(122,2,ST_MakePoint(1,2),current_timestamp,0,0,0,false);
--- LW
 -- actions 
 -- 1.like_increment 2.like_decrement 3.dislike_increment 4.dislike_decrement 5.view_increment
 -- caveat:Front-end takes care of whether user has already liked it or not
@@ -172,7 +171,7 @@ update public_posts set deleted=true where user_id=1 and public_post_id=1;
 			last_location_ geography;
 		begin
 			select last_location into last_location_ from user_last_location where user_id=post_req_sender_id;
-			return query select user_id,public_post_id,views,likes,dislikes from public_posts WHERE ST_DWithin(public_post_location,last_location_, 5000) and deleted=false order by public_post_time desc limit 5;
+			return query select user_id,public_post_id,views,likes,dislikes from public_posts WHERE ST_DWithin(public_post_location,last_location_, 15000) and deleted=false order by public_post_time desc limit 5;
 		end;
 		$$
 		language plpgsql;
@@ -192,7 +191,7 @@ update public_posts set deleted=true where user_id=1 and public_post_id=1;
 			begin
 				select last_location into last_location_ from user_last_location where user_id=post_req_sender_id;
 				select public_post_time  into last_post_timestamp from public_posts where user_id=user_id_of_last_post and public_post_id=post_id_of_last_post;
-				return query SELECT user_id,public_post_id,views,likes,dislikes FROM public_posts WHERE ST_DWithin(public_post_location,last_location_, 5000) and public_post_time<(last_post_timestamp) and deleted=false order by public_post_time desc limit 2;
+				return query SELECT user_id,public_post_id,views,likes,dislikes FROM public_posts WHERE ST_DWithin(public_post_location,last_location_, 15000) and public_post_time<(last_post_timestamp) and deleted=false order by public_post_time desc limit 2;
 			end;
 			$$
 			language plpgsql;
@@ -253,7 +252,6 @@ BEGIN
 	elseif action_=3 then
 		views_=views_+1;
 	end if;
-	update private_posts set views=views_,likes=likes_ where user_id=user_id_ and private_post_id=private_post_id_;
 	-- Do not commit inside a procedure while psycopg.. Use connection.commit()
 	raise notice 'PG:private action_ % done successfully',action_;
 	END;
@@ -268,7 +266,37 @@ $BODY$;
 
 
 -- private feed
+-- LW:Write feed functions
 	-- First request
+	create or replace function private_feed_first_request(post_req_sender_id integer)
+	  returns table (user_id_ integer,private_post_id_ integer,views_ integer,likes_ integer)
+	as
+	$$
+	declare
+	begin
+		 return query select user_id,private_post_id,views,likes from private_posts where user_id=(select followee_id from followers where follower_id=post_req_sender_id) order by private_post_time desc limit 5;
+	end;
+	$$
+	language plpgsql;
+	commit;
+	-- call the func
+	select private_feed_first_request(172);
+	--
+
+	create or replace function private_feed_subsequent_request(post_req_sender_id integer,user_id_of_last_post integer,post_id_of_last_post integer)
+	  returns table (user_id_ integer,private_post_id_ integer,views_ integer,likes_ integer)
+	as
+	$$
+	declare
+	begin
+	 return query select user_id,private_post_id,views,likes from private_posts where user_id=(select followee_id from followers where follower_id=post_req_sender_id) and private_post_time<(select private_post_time from private_posts where user_id=user_id_of_last_post and private_post_id=post_id_of_last_post) order by private_post_time desc limit 5;
+	end;
+	$$
+	language plpgsql;
+	commit;
+	-- 
+	select private_feed_subsequent_request(172,188,2);
+	-- 
 	select user_id,private_post_id,views,likes from private_posts where user_id=(select followee_id from followers where follower_id=1) order by private_post_time desc;
 
 -- Subsequent requests using pointer
