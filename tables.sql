@@ -3,7 +3,8 @@
 -- Username availability check
 -- If it returns 0,username is available.Case sensitive
 select count(username) from auth_user where username='Al';
-
+--While deploying
+create extension postgis;
 -- Follow Requests
 -- ToDo==>primary key (req_sender_id,req_receiver_id)
 create table follow_requests (req_sender_id integer,req_receiver_id integer,req_time timestamptz);
@@ -191,7 +192,7 @@ update public_posts set deleted=true where user_id=1 and public_post_id=1;
 			begin
 				select last_location into last_location_ from user_last_location where user_id=post_req_sender_id;
 				select public_post_time  into last_post_timestamp from public_posts where user_id=user_id_of_last_post and public_post_id=post_id_of_last_post;
-				return query SELECT user_id,public_post_id,views,likes,dislikes FROM public_posts WHERE ST_DWithin(public_post_location,last_location_, 15000) and public_post_time<(last_post_timestamp) and deleted=false order by public_post_time desc limit 2;
+				return query SELECT user_id,public_post_id,views,likes,dislikes FROM public_posts WHERE ST_DWithin(public_post_location,last_location_, 15000) and public_post_time<(last_post_timestamp) and deleted=false order by public_post_time desc limit 5;
 			end;
 			$$
 			language plpgsql;
@@ -235,9 +236,9 @@ insert into private_posts(user_id,private_post_id,private_post_time,views,likes,
 -- 
 
 
--- Private post actions
+-- Private post actions --This is useless since fE has to taka care of already liked or not
 -- 1.like_increment 2.like_decrement 3.view_increment
-create or replace procedure private_post_actions(user_id_,private_post_id_,action_)
+create or replace procedure private_post_actions(user_id_ ,private_post_id_,action_)
 LANGUAGE 'plpgsql'
 AS $BODY$
 declare
