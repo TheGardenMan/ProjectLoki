@@ -1,7 +1,0 @@
-aug27
-Our literature is about image reccomendation engine.
-We are gonna tell mam that we use a reccomendation engine in public feed to show relevant public posts to users.
-Links:
-	1.https://arxiv.org/pdf/1805.08694 - Image Based Fashion Product Recommendation with Deep 
-	Learning
-	2.http://cs231n.stanford.edu/reports/2017/pdfs/105.pdf - Image-based Product Recommendation System with Convolutional NeuralNetworks
